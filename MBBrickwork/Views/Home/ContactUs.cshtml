@@ -1,0 +1,132 @@
+﻿@{
+	ViewData["Title"] = "Privacy Policy";
+}
+<h1 class="page-title">@ViewData["Title"]</h1>
+
+<div class="card form-card">
+	<div id="formContainer">
+		<div class="form-group">
+			<label for="contact-us-name">Name</label>
+			<input id="contact-us-name" type="text" class="form-control" placeholder="Enter your name">
+		</div>
+		<div class="form-group">
+			<label for="contact-us-email">Email</label>
+			<input id="contact-us-email" type="email" class="form-control" placeholder="Enter your email">
+		</div>
+		<div class="form-group">
+			<label for="contact-us-query">Query</label>
+			<textarea id="contact-us-query" class="form-control" placeholder="Type your query"></textarea>
+		</div>
+		<button id="contact-us-submit" class="btn btn-primary">Submit</button>
+	</div>
+</div>
+
+
+<style>
+	/* Page Title */
+	.page-title {
+		text-align: center;
+		margin-bottom: 30px;
+		font-size: 2rem;
+		color: #333;
+	}
+
+	/* Card styling */
+	.form-card {
+		max-width: 500px;
+		margin: 0 auto;
+		padding: 30px;
+		border-radius: 12px;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+		background-color: #fff;
+	}
+
+	/* Form group styling */
+	.form-group {
+		margin-bottom: 20px;
+	}
+
+		.form-group label {
+			display: block;
+			font-weight: 600;
+			margin-bottom: 8px;
+			color: #555;
+		}
+
+	.form-control {
+		width: 100%;
+		padding: 12px 15px;
+		border: 1px solid #ccc;
+		border-radius: 8px;
+		font-size: 1rem;
+		transition: border-color 0.3s, box-shadow 0.3s;
+	}
+
+		.form-control:focus {
+			border-color: #007bff;
+			box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+			outline: none;
+		}
+
+	/* Button styling */
+	.btn-primary {
+		width: 100%;
+		padding: 12px;
+		font-size: 1rem;
+		font-weight: 600;
+		border: none;
+		border-radius: 8px;
+		background-color: #007bff;
+		color: #fff;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+		.btn-primary:hover {
+			background-color: #0056b3;
+		}
+</style>
+
+
+@section scripts {
+
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script>
+		$('#contact-us-submit').on('click', function() {
+			let name = $('#contact-us-name').val();
+			let email = $('#contact-us-email').val();
+			let query = $('#contact-us-query').val();
+
+			// Simple validation
+			if(!name || !email || !query){
+				alert("Please fill in all fields.");
+				return;
+			}
+
+			console.log("Name:", name, "Email:", email, "Query:", query);
+			alert("Thank you! Your query has been submitted.");
+
+
+				 $.ajax({
+			url: '/Home/mailSender',
+			method: 'POST',
+			data: {
+				name:name,
+				email: email,				
+				query: query
+			},
+			success: function (response) {
+				console.log('Success:', response);
+			},
+			error: function (xhr, status, error) {
+				console.error('Error:', error);
+			}
+		});
+			// Clear form
+			$('#contact-us-name').val('');
+			$('#contact-us-email').val('');
+			$('#contact-us-query').val('');
+		});
+	</script>
+}

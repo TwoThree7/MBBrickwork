@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "Brickwork Animation";
+}
+
+<style>
+    /* This makes the page long enough to actually scroll */
+    .scroll-container {
+        height: 500vh; /* 3 times the viewport height */
+        position: relative;
+        background-color: #FFF; /* Dark background looks better for product reveals */
+    }
+
+    /* The "Background" element that stays fixed while you scroll */
+    .sticky-frame-container {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    #scroll-image {
+        max-width: 100%; 
+        max-height: 100vh;
+        object-fit: contain;
+        /* Optional: Add a slight transition for smoothness,
+               though 'scrubbing' usually looks best instant */
+    }
+
+    .content-overlay {
+        position: relative;
+        z-index: 10;
+        color: #000;
+        text-align: center;
+        padding-top: 5vh;
+        pointer-events: none; /* Allows scrolling through the text */
+    }
+
+    #sidebar-wrapper {
+        position: sticky;
+        top: 0;
+        height: 100vh; /* Ensures it spans the full viewport height */
+        z-index: 1000; /* Keeps it above the scrolling background images */
+        overflow-y: auto; /* Allows the sidebar itself to scroll if the menu is long */
+    }
+
+    /* Ensure the wrapper doesn't collapse */
+    #wrapper {
+        display: flex;
+        align-items: flex-start;
+    }
+</style>
+
+<div class="scroll-container">
+    <div class="sticky-frame-container">
+        <img id="scroll-image" src="/assets/MBScollEdit/0001.png" alt="Brick Animation" />
+    </div>
+
+    <div class="content-overlay">
+        <h1>@ViewData["Title"]</h1>
+        <p>Quality Product Delivery on any time scale</p>
+    </div>
+   
+</div>
+
+@section Scripts {
+    <script>
+        $('#sidebar-wrapper,#page-content-wrapper > footer').addClass('d-none');
+
+        const img = document.getElementById("scroll-image");
+        const scrollContainer = document.querySelector(".scroll-container");
+        const totalFrames = 24; // Change this if you have more frames later
+        var currentFrame = 0;
+        window.addEventListener("scroll", () => {
+            // Calculate scroll percentage
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollFraction = scrollTop / maxScroll;
+            console.log(maxScroll);
+            // Map scroll percentage to frame index (1 to 24)
+            // Math.min/max keeps it within your 0001-0024 range
+            const frameIndex = Math.min(
+                totalFrames,
+                Math.max(1, Math.ceil(scrollFraction * totalFrames))
+            );
+
+            // Format the number to match your 0001.png naming (padding with zeros)
+            const frameName = frameIndex.toString().padStart(4, '0');
+            console.log(frameName);
+            // Update the image source
+          currentFrame = frameName;
+            img.src = `/assets/MBScollEdit/${frameName}.png`;
+            if (currentFrame=='0024'){
+            $('#sidebar-wrapper').removeClass('d-none');
+        }
+        });
+
+        // Preload images to prevent flickering
+        for (let i = 1; i <= totalFrames; i++) {
+            const frameName = i.toString().padStart(4, '0');
+            new Image().src = `/assets/MBScollEdit/${frameName}.png`;
+        }
+       
+    </script>
+}

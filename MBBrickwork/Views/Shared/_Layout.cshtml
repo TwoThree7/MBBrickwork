@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MBBrickwork</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/MBBrickwork.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
+        <nav class="border-end bg-white" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light text-center py-3">
+                <a asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/assets/MB-Brickwork-logo.png" alt="Brickwork Logo" class="img-fluid" style="max-height: 60px;" />
+                </a>
+            </div>
+
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                   asp-area="" asp-controller="Home" asp-action="Index">
+                    Home
+                </a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                   asp-area="" asp-controller="Home" asp-action="Privacy">
+                    Privacy
+                </a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                   asp-area="" asp-controller="Home" asp-action="ContactUs">
+                    Contact Us
+                </a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                   asp-area="" asp-controller="Home" asp-action="About">
+                    About
+                </a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                   asp-area="" asp-controller="Home" asp-action="Invoice">
+                    Invoice Generation [test]
+                </a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3"
+                   asp-area="" asp-controller="Home" asp-action="Test">
+                    [test]
+                </a>
+            </div>
+        </nav>
+
+        <!-- Page content -->
+        <div id="page-content-wrapper" class="flex-grow-1">
+            <main role="main" class="container-fluid p-4">
+                @RenderBody()
+            </main>
+
+            <footer class="border-top footer text-muted text-center py-3">
+                &copy; 2026 - MBBrickwork -
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

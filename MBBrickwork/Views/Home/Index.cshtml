@@ -1,0 +1,237 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="card">
+    <!-- IMAGE CAROUSEL -->
+    <div class="header">
+        <h1>Welcome to M.B. Brickworks Solutions</h1>
+        <p>Our Recent Projects</p>
+    </div>
+
+    <div id="img-container">
+        <button id="img-left-btn" class="nav-btn">&lt;</button>
+
+        <img id="imgA" class="home-img" src="~/assets/displayPanelPhotoOne.png" alt="Project Photo 1" />
+        <img id="imgB" class="home-img" src="~/assets/displayPanelPhotoTwo.png" alt="Project Photo 2" style="display:none;" />
+
+        <button id="img-right-btn" class="nav-btn">&gt;</button>
+    </div>
+</div>
+
+<div class="card">
+    <!-- REVIEW CAROUSEL -->
+    <div class="header">
+        <h1>Customer Reviews</h1>
+        <p>What our clients say about us</p>
+    </div>
+
+    <div id="review-container">
+        <button id="review-left-btn" class="nav-btn">&lt;</button>
+
+        <div id="review-wrapper">
+            <div class="review-card">
+                <p class="reviewer-name">John Doe</p>
+                <p class="review-stars">⭐⭐⭐⭐⭐</p>
+                <p class="review-text">"Excellent workmanship and timely delivery. Highly recommend!"</p>
+            </div>
+            <div class="review-card" style="display:none;">
+                <p class="reviewer-name">Jane Smith</p>
+                <p class="review-stars">⭐⭐⭐⭐⭐</p>
+                <p class="review-text">"Very professional and quality brickwork. Will hire again."</p>
+            </div>
+            <div class="review-card" style="display:none;">
+                <p class="reviewer-name">Michael Lee</p>
+                <p class="review-stars">⭐⭐⭐⭐⭐</p>
+                <p class="review-text">"Friendly staff and excellent results. Absolutely satisfied!"</p>
+            </div>
+        </div>
+
+        <button id="review-right-btn" class="nav-btn">&gt;</button>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        // -------------------------------
+        // IMAGE CAROUSEL
+        // -------------------------------
+        let images = ['#imgA', '#imgB'];
+        let currentImg = 0;
+        let imgAnimating = false;
+
+        function showImage(index) {
+            if (imgAnimating || index === currentImg) return;
+            imgAnimating = true;
+
+            $(images[currentImg]).fadeOut(500, function() {
+                $(images[index]).fadeIn(500, function() {
+                    currentImg = index;
+                    imgAnimating = false;
+                });
+            });
+        }
+
+        $('#img-right-btn').on('click', function() {
+            let nextIndex = (currentImg + 1) % images.length;
+            showImage(nextIndex);
+        });
+
+        $('#img-left-btn').on('click', function() {
+            let prevIndex = (currentImg - 1 + images.length) % images.length;
+            showImage(prevIndex);
+        });
+
+        // -------------------------------
+        // REVIEW CAROUSEL
+        // -------------------------------
+        let reviews = $('#review-wrapper .review-card');
+        let currentReview = 0;
+        let reviewAnimating = false;
+
+        function showReview(index) {
+            if (reviewAnimating || index === currentReview) return;
+            reviewAnimating = true;
+
+            $(reviews[currentReview]).fadeOut(400, function() {
+                $(reviews[index]).fadeIn(400, function() {
+                    currentReview = index;
+                    reviewAnimating = false;
+                });
+            });
+        }
+
+        $('#review-right-btn').on('click', function() {
+            let nextIndex = (currentReview + 1) % reviews.length;
+            showReview(nextIndex);
+        });
+
+        $('#review-left-btn').on('click', function() {
+            let prevIndex = (currentReview - 1 + reviews.length) % reviews.length;
+            showReview(prevIndex);
+        });
+    </script>
+}
+
+<style>
+    /* CARD */
+    .card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        max-width: 900px;
+        margin: 40px auto;
+        background-color: #f9f9f9;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* HEADER */
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .header h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #666;
+        }
+
+    /* IMAGE CAROUSEL */
+    #img-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        position: relative;
+    }
+
+    .home-img {
+        width: 400px;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+
+        .home-img:hover {
+            transform: scale(1.02);
+        }
+
+    /* REVIEW CAROUSEL */
+    #review-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        position: relative;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    #review-wrapper {
+        width: 600px;
+        text-align: center;
+        position: relative;
+    }
+
+    .review-card {
+        background-color: #ffffff;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+    .reviewer-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .review-stars {
+        font-size: 1.1rem;
+        color: #FFD700;
+        margin-bottom: 10px;
+    }
+
+    .review-text {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    /* NAV BUTTONS */
+    .nav-btn {
+        font-size: 28px;
+        padding: 10px 14px;
+        cursor: pointer;
+        background-color: #ffffffaa;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        user-select: none;
+    }
+
+        .nav-btn:hover {
+            background-color: #007BFF;
+            color: white;
+            border-color: #007BFF;
+            transform: scale(1.1);
+        }
+
+</style>

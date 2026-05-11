@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "About Us";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>TO DO add in cv</p>
+<a class="btn btn-primary"
+   href="@Url.Content("~/assets/MB-Brickwork-CV.pdf")"
+   download>
+    Download CV
+</a>
+<button class="btn btn-primary" id="download-btn">Download CV</button>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>
+    document.getElementById("download-btn").addEventListener("click", function () {
+        const link = document.createElement("a");
+        link.href = '@Url.Content("~/assets/MB-Brickwork-CV.pdf")';
+        link.download = 'MB-Brickwork-CV.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+</script>
