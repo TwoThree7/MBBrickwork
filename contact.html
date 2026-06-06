@@ -371,7 +371,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      Masonry &amp; Brickwork<br>Worcestershire, UK
+      Masonry &amp; Brickwork<br>Leeds, UK
     </div>
   </aside>
 
@@ -384,13 +384,13 @@
         <div>
           <p class="section-label">Get in touch</p>
           <h1>Let's talk about<br>your <em>project.</em></h1>
-          <p class="intro-body">Whether you have a clear brief or just an idea, we're happy to discuss your requirements and provide a free, no-obligation quote across Worcestershire and the surrounding areas.</p>
+          <p class="intro-body">Whether you have a clear brief or just an idea, we're happy to discuss your requirements and provide a free, no-obligation quote across Leeds and the surrounding areas.</p>
         </div>
 
         <div class="contact-details">
           <div class="contact-detail-item">
             <span class="detail-label">Coverage area</span>
-            <span class="detail-value">Worcestershire &amp; surrounds</span>
+            <span class="detail-value">Leeds &amp; surrounds</span>
           </div>
           <div class="contact-detail-item">
             <span class="detail-label">Response time</span>
@@ -442,7 +442,7 @@
 
           <div class="form-footer">
             <span class="form-note">We'll never share your details.</span>
-            <button type="submit">Send →</button>
+            <button type="submit" id="submit-btn">Send →</button>
           </div>
         </form>
       </div>
@@ -484,6 +484,7 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
       this.reset();
     });
+    $('#submit-btn').on('click',function(){console.log('qwerty')})
   </script>
 </body>
 </html>
