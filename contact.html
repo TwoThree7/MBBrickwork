@@ -460,7 +460,13 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/site.js"></script>
-
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){
+      // Replace with your real Public Key from the EmailJS Account Dashboard
+      emailjs.init("X7KSEX6Bos9nqANns");
+   })();
+</script>
   <script>
     window.addEventListener('scroll', () => {
       const total = document.documentElement.scrollHeight - window.innerHeight;
@@ -484,7 +490,43 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
       this.reset();
     });
-    $('#submit-btn').on('click',function(){console.log('qwerty')})
+    $('#submit-btn').on('click',function(){
+      //TODO validate 
+      let name = $('#name').val();
+      let contactInfo = $('#contact').val();
+      let reason = $('#reason').val();
+      let msg = $('#message').val();
+      sendEmailViaEmailJS(name,ccontactInfo,reason,msg)
+    })
+    function sendEmailViaEmailJS(senderName, senderContact, contactReason, messageContent) {
+    // 1. These IDs come from your EmailJS dashboard after setting up your email service & template
+    const serviceID = "service_ybp22cs";
+    const templateID = "template_57w09la";
+
+    // 2. Map these keys to match the variable placeholders {{}} inside your EmailJS email template
+    const templateParams = {
+        from_name: senderName,
+        reply_to: senderContact,
+        reason: contactReason,
+        message: messageContent
+    };
+
+    // 3. Send the email execution command
+    emailjs.send(serviceID, templateID, templateParams)
+        .then((response) => {
+            console.log("EmailJS Success!", response.status, response.text);
+            
+            // Show your custom page toast notification
+            const toast = document.getElementById('toast');
+            if(toast) {
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+        }, (error) => {
+            console.error("EmailJS Transmission Failed...", error);
+            alert("Something went wrong. Please try contacting us again.");
+        });
+}
   </script>
 </body>
 </html>
