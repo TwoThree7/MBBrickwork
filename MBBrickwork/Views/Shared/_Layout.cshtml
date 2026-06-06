@@ -1,68 +1,62 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MBBrickwork</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MBBrickwork.styles.css" asp-append-version="true" />
+    <title>Home - MBBrickwork</title>
+    
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="MBBrickwork.styles.css" />
 </head>
 <body>
     <div class="d-flex" id="wrapper">
-        <!-- Sidebar -->
         <nav class="border-end bg-white" id="sidebar-wrapper">
             <div class="sidebar-heading border-bottom bg-light text-center py-3">
-                <a asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/assets/MB-Brickwork-logo.png" alt="Brickwork Logo" class="img-fluid" style="max-height: 60px;" />
+                <a href="index.html">
+                    <img src="assets/MB-Brickwork-logo.png" alt="Brickwork Logo" class="img-fluid" style="max-height: 60px;" />
                 </a>
             </div>
 
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                   asp-area="" asp-controller="Home" asp-action="Index">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="index.html">
                     Home
                 </a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                   asp-area="" asp-controller="Home" asp-action="Privacy">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="privacy.html">
                     Privacy
                 </a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                   asp-area="" asp-controller="Home" asp-action="ContactUs">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="contact.html">
                     Contact Us
                 </a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                   asp-area="" asp-controller="Home" asp-action="About">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="about.html">
                     About
                 </a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                   asp-area="" asp-controller="Home" asp-action="Invoice">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="invoice.html">
                     Invoice Generation [test]
                 </a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3"
-                   asp-area="" asp-controller="Home" asp-action="Test">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="test.html">
                     [test]
                 </a>
             </div>
         </nav>
 
-        <!-- Page content -->
         <div id="page-content-wrapper" class="flex-grow-1">
             <main role="main" class="container-fluid p-4">
-                @RenderBody()
+                
+                <h1>Welcome to MBBrickwork</h1>
+                <p>Your unique homepage content goes right here!</p>
+                
             </main>
 
             <footer class="border-top footer text-muted text-center py-3">
                 &copy; 2026 - MBBrickwork -
-                <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                <a href="privacy.html">Privacy</a>
             </footer>
         </div>
     </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/site.js"></script>
 </body>
 </html>
