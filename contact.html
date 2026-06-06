@@ -496,7 +496,7 @@
       let contactInfo = $('#contact').val();
       let reason = $('#reason').val();
       let msg = $('#message').val();
-      sendEmailViaEmailJS(name,ccontactInfo,reason,msg)
+      sendEmailViaEmailJS(name,contactInfo ,reason,msg)
     })
     function sendEmailViaEmailJS(senderName, senderContact, contactReason, messageContent) {
     // 1. These IDs come from your EmailJS dashboard after setting up your email service & template
