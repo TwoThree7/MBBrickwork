@@ -490,20 +490,29 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
       this.reset();
     });
-    $('#submit-btn').on('click',function(){
-      //TODO validate 
-      let name = $('#name').val();
-      let contactInfo = $('#contact').val();
-      let reason = $('#reason').val();
-      let msg = $('#message').val();
-      sendEmailViaEmailJS(name,contactInfo ,reason,msg)
-    })
-    function sendEmailViaEmailJS(senderName, senderContact, contactReason, messageContent) {
-    // 1. These IDs come from your EmailJS dashboard after setting up your email service & template
+    $('#submit-btn').on('click', function() {
+    // 1. Get the values from the form inputs
+    let name = $('#name').val().trim();
+    let contactInfo = $('#contact').val().trim();
+    let reason = $('#reason').val();
+    let msg = $('#message').val().trim();
+    
+    // 2. Form Validation: ensure fields are filled out
+    if (!name || !contactInfo || !msg) {
+        alert("Please complete all required fields before submitting.");
+        return; // Stops the execution chain here if anything is empty
+    }
+    
+    // 3. Execute the submission function
+    sendEmailViaEmailJS(name, contactInfo, reason, msg);
+});
+
+function sendEmailViaEmailJS(senderName, senderContact, contactReason, messageContent) {
+    // 1. Service IDs from your EmailJS Account dashboard configurations
     const serviceID = "service_ybp22cs";
     const templateID = "template_57w09la";
 
-    // 2. Map these keys to match the variable placeholders {{}} inside your EmailJS email template
+    // 2. These property names align precisely with the HTML markup variables above
     const templateParams = {
         from_name: senderName,
         reply_to: senderContact,
@@ -511,12 +520,17 @@
         message: messageContent
     };
 
-    // 3. Send the email execution command
+    // 3. Send the email command
     emailjs.send(serviceID, templateID, templateParams)
         .then((response) => {
             console.log("EmailJS Success!", response.status, response.text);
             
-            // Show your custom page toast notification
+            // Clear inputs upon a successful submission loop
+            $('#name').val('');
+            $('#contact').val('');
+            $('#message').val('');
+
+            // Show your custom toast notification
             const toast = document.getElementById('toast');
             if(toast) {
                 toast.classList.add('show');
