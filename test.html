@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Brickwork Animation - MBBrickwork</title>
     
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/site.css" />
     <link rel="stylesheet" href="MBBrickwork.styles.css" />
 
     <style>
-        /* This makes the page long enough to actually scroll */
         .scroll-container {
-            height: 500vh; /* 5 times the viewport height */
+            height: 500vh; 
             position: relative;
             background-color: #FFF; 
         }
 
-        /* The "Background" element that stays fixed while you scroll */
         .sticky-frame-container {
             position: sticky;
             top: 0;
@@ -41,18 +39,17 @@
             color: #000;
             text-align: center;
             padding-top: 5vh;
-            pointer-events: none; /* Allows scrolling through the text */
+            pointer-events: none; 
         }
 
         #sidebar-wrapper {
             position: sticky;
             top: 0;
-            height: 100vh; /* Ensures it spans the full viewport height */
-            z-index: 1000; /* Keeps it above the scrolling background images */
-            overflow-y: auto; /* Allows the sidebar itself to scroll if the menu is long */
+            height: 100vh; 
+            z-index: 1000; 
+            overflow-y: auto; 
         }
 
-        /* Ensure the wrapper doesn't collapse */
         #wrapper {
             display: flex;
             align-items: flex-start;
@@ -79,7 +76,8 @@
         </nav>
 
         <div id="page-content-wrapper" class="flex-grow-1">
-            <main role="main" class="container-fluid p-0"> <div class="scroll-container">
+            <main role="main" class="container-fluid p-0"> 
+                <div class="scroll-container">
                     <div class="sticky-frame-container">
                         <img id="scroll-image" src="MBBrickwork/wwwroot/assets/MBScollEdit/0001.png" alt="Brick Animation" />
                     </div>
@@ -89,7 +87,6 @@
                         <p>Quality Product Delivery on any time scale</p>
                     </div>
                 </div>
-
             </main>
 
             <footer class="border-top footer text-muted text-center py-3">
@@ -99,8 +96,8 @@
         </div>
     </div>
 
-    <script src="lib/jquery/dist/jquery.min.js"></script>
-    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/site.js"></script>
 
     <script>
@@ -113,35 +110,28 @@
         var currentFrame = 0;
 
         window.addEventListener("scroll", () => {
-            // Calculate scroll percentage
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
             const scrollFraction = scrollTop / maxScroll;
             
-            // Map scroll percentage to frame index (1 to 24)
             const frameIndex = Math.min(
                 totalFrames,
                 Math.max(1, Math.ceil(scrollFraction * totalFrames))
             );
 
-            // Format number to match 0001.png naming convention
             const frameName = frameIndex.toString().padStart(4, '0');
-            
             currentFrame = frameName;
             
-            // Fixed Path: Removed leading slash so it works as a relative path in GitHub Pages
             img.src = `MBBrickwork/wwwroot/assets/MBScollEdit/${frameName}.png`;
             
-            // Show sidebar when reaching the last frame
             if (currentFrame == '0024') {
                 $('#sidebar-wrapper').removeClass('d-none');
             }
         });
 
-        // Preload images to prevent flickering on scroll
+        // Preload images
         for (let i = 1; i <= totalFrames; i++) {
             const frameName = i.toString().padStart(4, '0');
-            // Fixed Path: Relative preloader path matching the runtime code
             new Image().src = `assets/MBScollEdit/${frameName}.png`;
         }
     </script>
