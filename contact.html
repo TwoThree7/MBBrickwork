@@ -1,1 +1,259 @@
-contact
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f2ee;
+      --ink: #1a1714;
+      --muted: #9e9890;
+      --line: #d6d1c9;
+      --accent: #c0392b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+      opacity: 0;
+      transform: translateY(18px);
+      animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    }
+
+    @keyframes rise {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      margin-bottom: 3rem;
+    }
+
+    .label {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.1;
+      color: var(--ink);
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .field {
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .field:nth-child(1) { animation-delay: 0.25s; }
+    .field:nth-child(2) { animation-delay: 0.35s; }
+    .field:nth-child(3) { animation-delay: 0.45s; }
+
+    .field-label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      padding: 0.55rem 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.25s;
+      appearance: none;
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+
+    textarea {
+      resize: none;
+      height: 90px;
+      line-height: 1.6;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-bottom-color: var(--ink);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--line);
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: '↓';
+      position: absolute;
+      right: 0;
+      bottom: 0.55rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    select option { background: var(--bg); }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 2.5rem 0;
+      opacity: 0;
+      animation: rise 0.4s ease 0.55s forwards;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      opacity: 0;
+      animation: rise 0.4s ease 0.6s forwards;
+    }
+
+    .note {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    button {
+      background: var(--ink);
+      color: var(--bg);
+      border: none;
+      padding: 0.75rem 1.8rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    button:hover { background: var(--accent); }
+    button:active { transform: scale(0.97); }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      padding: 0.7rem 1.4rem;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <p class="label">Get in touch</p>
+    <h1>Say <em>hello.</em></h1>
+  </header>
+
+  <form id="contactForm" novalidate>
+    <div class="field">
+      <label class="field-label" for="name">Name</label>
+      <input id="name" type="text" placeholder="Your full name" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="contact">Contact info</label>
+      <input id="contact" type="text" placeholder="Email or phone number" autocomplete="email" required>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="reason">Reason for contact</label>
+      <div class="select-wrap">
+        <select id="reason" required>
+          <option value="" disabled selected>Select a reason</option>
+          <option value="general">General enquiry</option>
+          <option value="support">Support</option>
+          <option value="collaboration">Collaboration</option>
+          <option value="feedback">Feedback</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="message">Message <span style="opacity:.4">(optional)</span></label>
+      <textarea id="message" placeholder="Anything else you'd like to add…"></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="actions">
+      <span class="note">We'll be in touch shortly.</span>
+      <button type="submit">Send →</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast">Message sent — thank you.</div>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name    = document.getElementById('name').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+    const reason  = document.getElementById('reason').value;
+    if (!name || !contact || !reason) {
+      const first = [...document.querySelectorAll('input,select')].find(el => !el.value.trim());
+      if (first) first.focus();
+      return;
+    }
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+    this.reset();
+  });
+</script>
+
+</body>
+</html>
