@@ -102,7 +102,7 @@
 
     <script>
         // Hide navigation layout assets initially
-        $('#sidebar-wrapper, #page-content-wrapper > footer').addClass('d-none');
+        // $('#sidebar-wrapper, #page-content-wrapper > footer').addClass('d-none');
 
         const img = document.getElementById("scroll-image");
         const scrollContainer = document.querySelector(".scroll-container");
@@ -124,9 +124,9 @@
             
             img.src = `MBBrickwork/wwwroot/assets/MBScollEdit/${frameName}.png`;
             
-            if (currentFrame == '0024') {
-                $('#sidebar-wrapper').removeClass('d-none');
-            }
+            // if (currentFrame == '0024') {
+            //     $('#sidebar-wrapper').removeClass('d-none');
+            // }
         });
 
         // Preload images
