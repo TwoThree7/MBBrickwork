@@ -101,30 +101,33 @@
     <script src="js/site.js"></script>
 
     <script>
-        const img = document.getElementById("scroll-image");
-        const scrollContainer = document.querySelector(".scroll-container");
-        const totalFrames = 24; 
-        var currentFrame = 0;
+    const img = document.getElementById("scroll-image");
+    const scrollContainer = document.querySelector(".scroll-container");
+    const totalFrames = 24; 
+    var currentFrame = 0;
 
-        window.addEventListener("scroll", () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
-            const scrollFraction = scrollTop / maxScroll;
-            
-            const frameIndex = Math.min(
-                totalFrames,
-                Math.max(1, Math.ceil(scrollFraction * totalFrames))
-            );
+    
+    for (let i = 1; i <= totalFrames; i++) {
+        const frameName = i.toString().padStart(4, '0');
+        new Image().src = `MBBrickwork/wwwroot/assets/MBScollEdit/${frameName}.png`;
+    }
 
-            const frameName = frameIndex.toString().padStart(4, '0');
-            currentFrame = frameName;
-            
-            img.src = `MBBrickwork/wwwroot/assets/MBScollEdit/${frameName}.png`;
-            
-        for (let i = 1; i <= totalFrames; i++) {
-            const frameName = i.toString().padStart(4, '0');
-            new Image().src = `MBBrickwork/wwwroot/assets/MBScollEdit/${frameName}.png`;
-        }
-    </script>
+  
+    window.addEventListener("scroll", () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
+        const scrollFraction = scrollTop / maxScroll;
+        
+        const frameIndex = Math.min(
+            totalFrames,
+            Math.max(1, Math.ceil(scrollFraction * totalFrames))
+        );
+
+        const frameName = frameIndex.toString().padStart(4, '0');
+        currentFrame = frameName;
+        
+        img.src = `MBBrickwork/wwwroot/assets/MBScollEdit/${frameName}.png`;
+    }); 
+</script>
 </body>
 </html>
