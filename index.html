@@ -1,62 +1,218 @@
-﻿<!-- @{
-    ViewData["Title"] = "Home";
-} -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home - MBBrickwork</title>
+    
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="MBBrickwork.styles.css" />
 
-<div class="card">
-    <!-- IMAGE CAROUSEL -->
-    <div class="header">
-        <h1>Welcome to M.B. Brickworks Solutions - TEST</h1>
-        <p>Our Recent Projects</p>
-    </div>
+    <style>
+        /* CARD */
+        .card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: #f9f9f9;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
 
-    <div id="img-container">
-        <button id="img-left-btn" class="nav-btn">&lt;</button>
+        /* HEADER */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-        <img id="imgA" class="home-img" src="~/assets/displayPanelPhotoOne.png" alt="Project Photo 1" />
-        <img id="imgB" class="home-img" src="~/assets/displayPanelPhotoTwo.png" alt="Project Photo 2" style="display:none;" />
+        .header h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-        <button id="img-right-btn" class="nav-btn">&gt;</button>
-    </div>
-</div>
+        .header p {
+            font-size: 18px;
+            color: #666;
+        }
 
-<div class="card">
-    <!-- REVIEW CAROUSEL -->
-    <div class="header">
-        <h1>Customer Reviews</h1>
-        <p>What our clients say about us</p>
-    </div>
+        /* IMAGE CAROUSEL */
+        #img-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+        }
 
-    <div id="review-container">
-        <button id="review-left-btn" class="nav-btn">&lt;</button>
+        .home-img {
+            width: 400px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
 
-        <div id="review-wrapper">
-            <div class="review-card">
-                <p class="reviewer-name">John Doe</p>
-                <p class="review-stars">⭐⭐⭐⭐⭐</p>
-                <p class="review-text">"Excellent workmanship and timely delivery. Highly recommend!"</p>
+        .home-img:hover {
+            transform: scale(1.02);
+        }
+
+        /* REVIEW CAROUSEL */
+        #review-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #review-wrapper {
+            width: 600px;
+            text-align: center;
+            position: relative;
+        }
+
+        .review-card {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .reviewer-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .review-stars {
+            font-size: 1.1rem;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .review-text {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* NAV BUTTONS */
+        .nav-btn {
+            font-size: 28px;
+            padding: 10px 14px;
+            cursor: pointer;
+            background-color: #ffffffaa;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .nav-btn:hover {
+            background-color: #007BFF;
+            color: white;
+            border-color: #007BFF;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <nav class="border-end bg-white" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light text-center py-3">
+                <a href="index.html">
+                    <img src="assets/MB-Brickwork-logo.png" alt="Brickwork Logo" class="img-fluid" style="max-height: 60px;" />
+                </a>
             </div>
-            <div class="review-card" style="display:none;">
-                <p class="reviewer-name">Jane Smith</p>
-                <p class="review-stars">⭐⭐⭐⭐⭐</p>
-                <p class="review-text">"Very professional and quality brickwork. Will hire again."</p>
+
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="index.html">Home</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="privacy.html">Privacy</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="contact.html">Contact Us</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="about.html">About</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="invoice.html">Invoice Generation [test]</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="test.html">[test]</a>
             </div>
-            <div class="review-card" style="display:none;">
-                <p class="reviewer-name">Michael Lee</p>
-                <p class="review-stars">⭐⭐⭐⭐⭐</p>
-                <p class="review-text">"Friendly staff and excellent results. Absolutely satisfied!"</p>
-            </div>
+        </nav>
+
+        <div id="page-content-wrapper" class="flex-grow-1">
+            <main role="main" class="container-fluid p-4">
+                
+                <div class="card">
+                    <div class="header">
+                        <h1>Welcome to M.B. Brickworks Solutions - TEST</h1>
+                        <p>Our Recent Projects</p>
+                    </div>
+
+                    <div id="img-container">
+                        <button id="img-left-btn" class="nav-btn">&lt;</button>
+                        <img id="imgA" class="home-img" src="assets/displayPanelPhotoOne.png" alt="Project Photo 1" />
+                        <img id="imgB" class="home-img" src="assets/displayPanelPhotoTwo.png" alt="Project Photo 2" style="display:none;" />
+                        <button id="img-right-btn" class="nav-btn">&gt;</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="header">
+                        <h1>Customer Reviews</h1>
+                        <p>What our clients say about us</p>
+                    </div>
+
+                    <div id="review-container">
+                        <button id="review-left-btn" class="nav-btn">&lt;</button>
+
+                        <div id="review-wrapper">
+                            <div class="review-card">
+                                <p class="reviewer-name">John Doe</p>
+                                <p class="review-stars">⭐⭐⭐⭐⭐</p>
+                                <p class="review-text">"Excellent workmanship and timely delivery. Highly recommend!"</p>
+                            </div>
+                            <div class="review-card" style="display:none;">
+                                <p class="reviewer-name">Jane Smith</p>
+                                <p class="review-stars">⭐⭐⭐⭐⭐</p>
+                                <p class="review-text">"Very professional and quality brickwork. Will hire again."</p>
+                            </div>
+                            <div class="review-card" style="display:none;">
+                                <p class="reviewer-name">Michael Lee</p>
+                                <p class="review-stars">⭐⭐⭐⭐⭐</p>
+                                <p class="review-text">"Friendly staff and excellent results. Absolutely satisfied!"</p>
+                            </div>
+                        </div>
+
+                        <button id="review-right-btn" class="nav-btn">&gt;</button>
+                    </div>
+                </div>
+
+            </main>
+
+            <footer class="border-top footer text-muted text-center py-3">
+                &copy; 2026 - MBBrickwork -
+                <a href="privacy.html">Privacy</a>
+            </footer>
         </div>
-
-        <button id="review-right-btn" class="nav-btn">&gt;</button>
     </div>
-</div>
-<!-- 
-@section scripts { -->
+
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/site.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    
     <script>
-        // -------------------------------
         // IMAGE CAROUSEL
-        // -------------------------------
         let images = ['#imgA', '#imgB'];
         let currentImg = 0;
         let imgAnimating = false;
@@ -83,9 +239,7 @@
             showImage(prevIndex);
         });
 
-        // -------------------------------
         // REVIEW CAROUSEL
-        // -------------------------------
         let reviews = $('#review-wrapper .review-card');
         let currentReview = 0;
         let reviewAnimating = false;
@@ -112,126 +266,5 @@
             showReview(prevIndex);
         });
     </script>
-}
-
-<style>
-    /* CARD */
-    .card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 40px;
-        max-width: 900px;
-        margin: 40px auto;
-        background-color: #f9f9f9;
-        border-radius: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
-
-    /* HEADER */
-    .header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-
-        .header h1 {
-            font-size: 36px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 18px;
-            color: #666;
-        }
-
-    /* IMAGE CAROUSEL */
-    #img-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        position: relative;
-    }
-
-    .home-img {
-        width: 400px;
-        height: 400px;
-        object-fit: cover;
-        border-radius: 15px;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease;
-    }
-
-        .home-img:hover {
-            transform: scale(1.02);
-        }
-
-    /* REVIEW CAROUSEL */
-    #review-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        position: relative;
-        width: 100%;
-        margin-top: 20px;
-    }
-
-    #review-wrapper {
-        width: 600px;
-        text-align: center;
-        position: relative;
-    }
-
-    .review-card {
-        background-color: #ffffff;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-        .review-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-
-    .reviewer-name {
-        font-weight: 700;
-        font-size: 1.2rem;
-        margin-bottom: 5px;
-        color: #333;
-    }
-
-    .review-stars {
-        font-size: 1.1rem;
-        color: #FFD700;
-        margin-bottom: 10px;
-    }
-
-    .review-text {
-        font-size: 1rem;
-        color: #555;
-    }
-
-    /* NAV BUTTONS */
-    .nav-btn {
-        font-size: 28px;
-        padding: 10px 14px;
-        cursor: pointer;
-        background-color: #ffffffaa;
-        border: 2px solid #ccc;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-        user-select: none;
-    }
-
-        .nav-btn:hover {
-            background-color: #007BFF;
-            color: white;
-            border-color: #007BFF;
-            transform: scale(1.1);
-        }
-
-</style>
+</body>
+</html>
