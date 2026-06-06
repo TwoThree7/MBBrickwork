@@ -1,1 +1,587 @@
-projects
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects — MB Brickwork</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="MBBrickwork.styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --sand: #f4f0eb;
+      --ink: #1c1814;
+      --brick: #8b3a2a;
+      --muted: #a09890;
+      --line: #d8d2ca;
+      --sidebar-w: 220px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--sand);
+      color: var(--ink);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+    }
+
+    /* ── SCROLL PROGRESS ── */
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: var(--sidebar-w);
+      height: 2px;
+      width: 0%;
+      background: var(--brick);
+      z-index: 999;
+      transition: width 0.05s linear;
+    }
+
+    /* ── SIDEBAR ── */
+    #sidebar-wrapper {
+      position: fixed;
+      left: 0; top: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--sand);
+      border-right: 1px solid var(--line);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-logo {
+      padding: 2rem 1.8rem 1.6rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-logo a { display: block; text-decoration: none; }
+    .sidebar-logo img { max-height: 52px; width: auto; }
+
+    .logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .logo-text span { color: var(--brick); }
+
+    nav.sidebar-nav { padding: 2.5rem 0; flex: 1; }
+
+    nav.sidebar-nav a {
+      display: block;
+      padding: 0.65rem 1.8rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    nav.sidebar-nav a::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 2px;
+      height: 60%;
+      background: var(--brick);
+      transition: transform 0.2s;
+    }
+
+    nav.sidebar-nav a:hover { color: var(--ink); }
+    nav.sidebar-nav a:hover::before,
+    nav.sidebar-nav a.active::before { transform: translateY(-50%) scaleY(1); }
+    nav.sidebar-nav a.active { color: var(--ink); }
+
+    .sidebar-footer {
+      padding: 1.5rem 1.8rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN ── */
+    #page-content-wrapper { margin-left: var(--sidebar-w); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 5rem 5rem 3.5rem;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+    }
+
+    @keyframes rise {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--brick);
+      margin-bottom: 1rem;
+    }
+
+    .page-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 4vw, 3.6rem);
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+
+    .page-header h1 em { font-style: italic; color: var(--brick); }
+
+    .page-header p {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--muted);
+      max-width: 420px;
+    }
+
+    /* ── PROJECT COUNT ── */
+    .project-meta {
+      padding: 1.5rem 5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      animation: rise 0.6s cubic-bezier(0.22,1,0.36,1) 0.25s forwards;
+    }
+
+    .project-count {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .project-count strong {
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    /* ── PROJECTS LIST ── */
+    .projects-list { padding: 0; }
+
+    /* Each project row */
+    .project-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--line);
+      min-height: 420px;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+    }
+
+    .project-row.visible { opacity: 1; transform: translateY(0); }
+
+    /* Alternate image side */
+    .project-row:nth-child(even) { direction: rtl; }
+    .project-row:nth-child(even) > * { direction: ltr; }
+
+    /* Image pane */
+    .project-image {
+      position: relative;
+      overflow: hidden;
+      background: #e8e2da;
+      min-height: 380px;
+    }
+
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.7s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .project-row:hover .project-image img { transform: scale(1.03); }
+
+    /* Placeholder for images not yet added */
+    .img-placeholder {
+      width: 100%; height: 100%;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: #ede8e1;
+      color: var(--muted);
+    }
+
+    .img-placeholder .ph-icon {
+      width: 40px; height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .img-placeholder span {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* Project number badge */
+    .project-badge {
+      position: absolute;
+      top: 1.5rem; left: 1.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+      background: rgba(28,24,20,0.55);
+      backdrop-filter: blur(6px);
+      padding: 0.35rem 0.75rem;
+    }
+
+    /* Info pane */
+    .project-info {
+      padding: 3.5rem 4.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-left: 1px solid var(--line);
+    }
+
+    .project-row:nth-child(even) .project-info {
+      border-left: none;
+      border-right: 1px solid var(--line);
+    }
+
+    .project-type {
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--brick);
+      margin-bottom: 1rem;
+    }
+
+    .project-info h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 1.4rem;
+    }
+
+    .project-info p {
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: #5a524a;
+      margin-bottom: 2rem;
+    }
+
+    /* Detail chips */
+    .project-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2.2rem;
+    }
+
+    .detail-chip {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 0.3rem 0.75rem;
+    }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 2px;
+      width: fit-content;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .project-link:hover { color: var(--brick); border-color: var(--brick); }
+
+    /* ── CTA STRIP ── */
+    .cta-strip {
+      padding: 4rem 5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .cta-strip.visible { opacity: 1; transform: translateY(0); }
+
+    .cta-strip-text h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      margin-bottom: 0.4rem;
+    }
+
+    .cta-strip-text h3 em { font-style: italic; color: var(--brick); }
+
+    .cta-strip-text p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--sand);
+      background: var(--ink);
+      text-decoration: none;
+      padding: 0.85rem 2rem;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .cta-btn:hover { background: var(--brick); color: var(--sand); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 1.5rem 5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--ink); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .project-row { grid-template-columns: 1fr; min-height: auto; direction: ltr !important; }
+      .project-row:nth-child(even) .project-info { border-right: none; border-left: none; }
+      .project-info { border-left: none !important; border-right: none !important; padding: 2.5rem 2rem; }
+      .cta-strip { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      #sidebar-wrapper {
+        width: 100%; height: auto; position: fixed;
+        flex-direction: row; align-items: center;
+        border-right: none; border-bottom: 1px solid var(--line);
+        padding: 0.8rem 1.2rem;
+      }
+      .sidebar-logo { padding: 0; border-bottom: none; }
+      nav.sidebar-nav { padding: 0; display: flex; gap: 0.5rem; }
+      nav.sidebar-nav a { padding: 0.4rem 0.6rem; }
+      nav.sidebar-nav a::before { display: none; }
+      .sidebar-footer { display: none; }
+      #page-content-wrapper { margin-left: 0; margin-top: 60px; }
+      .page-header, .project-meta, .cta-strip { padding-left: 1.5rem; padding-right: 1.5rem; }
+      footer { flex-direction: column; gap: 0.5rem; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar-wrapper">
+    <div class="sidebar-logo">
+      <a href="index.html">
+        <img src="assets/MB-Brickwork-logo.png" alt="MB Brickwork"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <div class="logo-text" style="display:none">MB<br><span>Brickwork</span></div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="index.html">Home</a>
+      <a href="projects.html" class="active">Projects</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Masonry &amp; Brickwork<br>Worcestershire, UK
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="page-content-wrapper">
+    <main>
+
+      <!-- PAGE HEADER -->
+      <header class="page-header">
+        <p class="section-label">Our work</p>
+        <h1>Projects built with<br><em>care and craft.</em></h1>
+        <p>A selection of completed works across Worcestershire. Each project reflects our commitment to quality masonry and lasting results.</p>
+      </header>
+
+      <!-- META BAR -->
+      <div class="project-meta">
+        <p class="project-count"><strong>3</strong> completed projects</p>
+        <p class="project-count" style="color:var(--muted)">More to follow</p>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="projects-list">
+
+        <!-- PROJECT 01 -->
+        <div class="project-row observe-me">
+          <div class="project-image">
+            <!--
+              REPLACE the placeholder below with your actual image:
+              <img src="assets/projects/project-01.jpg" alt="Detached garage extension, Pershore" />
+            -->
+            <div class="img-placeholder">
+              <div class="ph-icon">⬜</div>
+              <span>Add project photo here</span>
+            </div>
+            <span class="project-badge">Project 01</span>
+          </div>
+
+          <div class="project-info">
+            <p class="project-type">Residential Extension</p>
+            <h2>Detached Garage &amp;<br>Garden Wall, Pershore</h2>
+            <p>A double-skin cavity brick garage built to match the existing Victorian-era brickwork of the client's property. Careful sourcing of reclaimed Worcestershire reds ensured a seamless aesthetic alongside a new garden boundary wall and pillared entrance.</p>
+            <div class="project-details">
+              <span class="detail-chip">Pershore, WR10</span>
+              <span class="detail-chip">Reclaimed brick</span>
+              <span class="detail-chip">Garden wall</span>
+              <span class="detail-chip">2024</span>
+            </div>
+            <a href="contact.html" class="project-link">Enquire about a similar project →</a>
+          </div>
+        </div>
+
+        <!-- PROJECT 02 -->
+        <div class="project-row observe-me">
+          <div class="project-image">
+            <!--
+              REPLACE the placeholder below with your actual image:
+              <img src="assets/projects/project-02.jpg" alt="Single-storey rear extension, Evesham" />
+            -->
+            <div class="img-placeholder">
+              <div class="ph-icon">⬜</div>
+              <span>Add project photo here</span>
+            </div>
+            <span class="project-badge">Project 02</span>
+          </div>
+
+          <div class="project-info">
+            <p class="project-type">New Build Extension</p>
+            <h2>Single-Storey Rear<br>Extension, Evesham</h2>
+            <p>Full brickwork and blockwork for a kitchen-dining extension to a 1960s semi-detached home. The project required precise colour-matching to weathered existing brickwork, completed with a feature corbelled detail to the rear elevation and new DPC throughout.</p>
+            <div class="project-details">
+              <span class="detail-chip">Evesham, WR11</span>
+              <span class="detail-chip">Block &amp; brick cavity</span>
+              <span class="detail-chip">Corbel detail</span>
+              <span class="detail-chip">2025</span>
+            </div>
+            <a href="contact.html" class="project-link">Enquire about a similar project →</a>
+          </div>
+        </div>
+
+        <!-- PROJECT 03 -->
+        <div class="project-row observe-me">
+          <div class="project-image">
+            <!--
+              REPLACE the placeholder below with your actual image:
+              <img src="assets/projects/project-03.jpg" alt="Chimney restoration, Droitwich" />
+            -->
+            <div class="img-placeholder">
+              <div class="ph-icon">⬜</div>
+              <span>Add project photo here</span>
+            </div>
+            <span class="project-badge">Project 03</span>
+          </div>
+
+          <div class="project-info">
+            <p class="project-type">Restoration &amp; Repointing</p>
+            <h2>Chimney Stack Rebuild<br>&amp; Repointing, Droitwich</h2>
+            <p>Sympathetic restoration of a deteriorated chimney stack on a Grade II listed farmhouse. Works included full stack rebuild above the flashing line using lime mortar, tuck-pointing to the original face brickwork, and new lead flashings — all approved by the local conservation officer.</p>
+            <div class="project-details">
+              <span class="detail-chip">Droitwich, WR9</span>
+              <span class="detail-chip">Listed building</span>
+              <span class="detail-chip">Lime mortar</span>
+              <span class="detail-chip">Conservation</span>
+              <span class="detail-chip">2025</span>
+            </div>
+            <a href="contact.html" class="project-link">Enquire about a similar project →</a>
+          </div>
+        </div>
+
+      </div><!-- /projects-list -->
+
+      <!-- CTA STRIP -->
+      <div class="cta-strip observe-me">
+        <div class="cta-strip-text">
+          <h3>Have a project in <em>mind?</em></h3>
+          <p>We offer free, no-obligation quotes across Worcestershire and the surrounding areas.</p>
+        </div>
+        <a class="cta-btn" href="contact.html">Get in touch →</a>
+      </div>
+
+    </main>
+
+    <footer>
+      <span>&copy; 2026 MBBrickwork</span>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/site.js"></script>
+
+  <script>
+    // Scroll progress bar
+    window.addEventListener('scroll', () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      document.getElementById('scrollProgress').style.width =
+        ((window.pageYOffset / total) * 100) + '%';
+    });
+
+    // Reveal on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.observe-me').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
