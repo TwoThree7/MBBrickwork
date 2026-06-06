@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brickwork Animation - MBBrickwork</title>
+    
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="MBBrickwork.styles.css" />
+
+    <style>
+        /* Your custom animation styles */
+        .scroll-container {
+            height: 500vh; /* 3 times the viewport height */
+            position: relative;
+            background-color: #FFF; 
+        }
+
+        .sticky-frame-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #scroll-image {
+            max-width: 100%; 
+            max-height: 100vh;
+            object-fit: contain;
+        }
+
+        .content-overlay {
+            position: relative;
+            z-index: 10;
+            color: #000;
+            text-align: center;
+            padding-top: 5vh;
+            pointer-events: none; 
+        }
+
+        #sidebar-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh; 
+            z-index: 1000; 
+            overflow-y: auto; 
+        }
+
+        #wrapper {
+            display: flex;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <nav class="border-end bg-white" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light text-center py-3">
+                <a href="index.html">
+                    <img src="assets/MB-Brickwork-logo.png" alt="Brickwork Logo" class="img-fluid" style="max-height: 60px;" />
+                </a>
+            </div>
+
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="index.html">Home</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="privacy.html">Privacy</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="contact.html">Contact Us</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="about.html">About</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="invoice.html">Invoice Generation [test]</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="test.html">[test]</a>
+            </div>
+        </nav>
+
+        <div id="page-content-wrapper" class="flex-grow-1">
+            <main role="main" class="container-fluid p-0"> <div class="scroll-container">
+                    <div class="sticky-frame-container">
+                        <img id="scroll-image" src="assets/MBScollEdit/0001.png" alt="Brick Animation" />
+                    </div>
+
+                    <div class="content-overlay">
+                        <h1>Brickwork Animation</h1>
+                        <p>Quality Product Delivery on any time scale</p>
+                    </div>
+                </div>
+
+            </main>
+
+            <footer class="border-top footer text-muted text-center py-3">
+                &copy; 2026 - MBBrickwork -
+                <a href="privacy.html">Privacy</a>
+            </footer>
+        </div>
+    </div>
+
+    <script src="lib/jquery/dist/jquery.min.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/site.js"></script>
+    
+    <script>
+        // Hides sidebar and footer initially on page load
+        $('#sidebar-wrapper, #page-content-wrapper > footer').addClass('d-none');
+
+        const img = document.getElementById("scroll-image");
+        const scrollContainer = document.querySelector(".scroll-container");
+        const totalFrames = 24; 
+        var currentFrame = 0;
+
+        window.addEventListener("scroll", () => {
+            // Calculate scroll percentage
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const maxScroll = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollFraction = scrollTop / maxScroll;
+            
+            // Map scroll percentage to frame index (1 to 24)
+            const frameIndex = Math.min(
+                totalFrames,
+                Math.max(1, Math.ceil(scrollFraction * totalFrames))
+            );
+
+            // Format number to match 0001.png naming convention
+            const frameName = frameIndex.toString().padStart(4, '0');
+            
+            // Update image source path without the leading root slash
+            currentFrame = frameName;
+            img.src = `assets/MBScollEdit/${frameName}.png`;
+            
+            // Show sidebar when reaching the last frame
+            if (currentFrame == '0024') {
+                $('#sidebar-wrapper').removeClass('d-none');
+            }
+        });
+
+        // Preload images to prevent flickering
+        for (let i = 1; i <= totalFrames; i++) {
+            const frameName = i.toString().padStart(4, '0');
+            new Image().src = `assets/MBScollEdit/${frameName}.png`;
+        }
+    </script>
+</body>
+</html>
