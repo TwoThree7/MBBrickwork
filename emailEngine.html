@@ -1,0 +1,2420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Renderer — MB Brickwork</title>
+
+  <!-- Vendor CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    /* =====================================================================
+       EMAIL RENDERER — MB Brickwork theme (single-file styling)
+       sand / ink / brick palette · Cormorant Garamond headings · Barlow body
+       hairline borders · letterspaced uppercase micro-labels · flat surfaces
+       ===================================================================== */
+
+    :root {
+      --sand: #f4f0eb;
+      --sand-deep: #ece6de;   /* slightly darker surface for wells/stages   */
+      --paper: #faf8f4;       /* card / panel surface, a touch off the sand */
+      --ink: #1c1814;
+      --ink-soft: #5a524a;
+      --brick: #8b3a2a;
+      --brick-dark: #6f2e21;
+      --muted: #a09890;
+      --line: #d8d2ca;
+      --sidebar-w: 220px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--sand);
+      color: var(--ink);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+    }
+
+    /* ── SIDEBAR (same shell as index.html) ── */
+    #sidebar-wrapper {
+      position: fixed;
+      left: 0; top: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--sand);
+      border-right: 1px solid var(--line);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-logo {
+      padding: 2rem 1.8rem 1.6rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-logo a { display: block; text-decoration: none; }
+    .sidebar-logo img { max-height: 52px; width: auto; }
+
+    .logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+
+    .logo-text span { color: var(--brick); }
+
+    nav.sidebar-nav { padding: 2.5rem 0; flex: 1; }
+
+    nav.sidebar-nav a {
+      display: block;
+      padding: 0.65rem 1.8rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    nav.sidebar-nav a::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 2px;
+      height: 60%;
+      background: var(--brick);
+      transition: transform 0.2s;
+    }
+
+    nav.sidebar-nav a:hover,
+    nav.sidebar-nav a.current { color: var(--ink); }
+    nav.sidebar-nav a:hover::before,
+    nav.sidebar-nav a.current::before { transform: translateY(-50%) scaleY(1); }
+
+    .sidebar-footer {
+      padding: 1.5rem 1.8rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    #page-content-wrapper { margin-left: var(--sidebar-w); }
+
+    .corner-label {
+      position: fixed;
+      right: 2rem;
+      top: 2rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      z-index: 100;
+    }
+
+    /* ── SHARED PRIMITIVES ── */
+    .section-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--brick);
+      margin-bottom: 1rem;
+    }
+
+    #colour-count,
+    #var-count {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .renderer-panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .renderer-panel + .renderer-panel { margin-top: 2rem; }
+
+    .renderer-panel-header {
+      background: transparent;
+      border-bottom: 1px solid var(--line);
+      padding: 1rem 1.4rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .renderer-panel-body { padding: 1.4rem; }
+
+    /* ── RENDERER PAGE LAYOUT ── */
+    .renderer-header {
+      padding: 4rem 3rem 2.5rem;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .renderer-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+
+    .renderer-header h1 em { font-style: italic; color: var(--brick); }
+
+    .renderer-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 2rem;
+      padding: 2.5rem 3rem 4rem;
+      align-items: start;
+    }
+
+    /* ── FORM CONTROLS ── */
+    .form-control,
+    .form-select {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0;
+      color: var(--ink);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      font-size: 0.85rem;
+      box-shadow: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      background: var(--paper);
+      border-color: var(--brick);
+      box-shadow: none;
+      outline: none;
+      color: var(--ink);
+    }
+
+    .form-control::placeholder { color: var(--muted); }
+
+    .form-label,
+    label {
+      font-size: 0.66rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── HTML SOURCE EDITOR ── */
+    #html-input {
+      width: 100%;
+      min-height: 300px;
+      background: var(--ink);
+      color: #e8e2da;
+      border: 1px solid var(--ink);
+      border-radius: 0;
+      font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      padding: 1.2rem;
+      resize: vertical;
+    }
+
+    #html-input:focus {
+      background: var(--ink);
+      color: #e8e2da;
+      border-color: var(--brick);
+      box-shadow: none;
+    }
+
+    #html-input::placeholder { color: #6b635b; }
+
+    #html-input::-webkit-scrollbar { width: 10px; }
+    #html-input::-webkit-scrollbar-track { background: var(--ink); }
+    #html-input::-webkit-scrollbar-thumb {
+      background: #453d35;
+      border: 2px solid var(--ink);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-mbb {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      color: var(--ink);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.1rem;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .btn-mbb:hover {
+      background: transparent;
+      border-color: var(--brick);
+      color: var(--brick);
+    }
+
+    .btn-mbb-primary,
+    #send-btn,
+    #apply-link-btn,
+    #add-images-btn {
+      background: var(--brick);
+      border: 1px solid var(--brick);
+      border-radius: 0;
+      color: var(--sand);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.3rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn-mbb-primary:hover,
+    #send-btn:hover,
+    #apply-link-btn:hover,
+    #add-images-btn:hover {
+      background: var(--brick-dark);
+      border-color: var(--brick-dark);
+      color: var(--sand);
+    }
+
+    /* ── FORMATTING TOOLBAR ── */
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.8rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-bottom: none;
+      flex-wrap: wrap;
+    }
+
+    #bold-btn, #italic-btn, #underline-btn, #link-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 0;
+      color: var(--ink-soft);
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    #bold-btn:hover, #italic-btn:hover, #underline-btn:hover, #link-btn:hover {
+      color: var(--brick);
+      border-color: var(--line);
+    }
+
+    /* Active state driven by initToolbarStateTracking() */
+    #bold-btn.active, #italic-btn.active, #underline-btn.active, #link-btn.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--sand);
+      box-shadow: none;
+    }
+
+    #font-size {
+      width: 74px;
+      text-align: center;
+      font-size: 0.78rem;
+    }
+
+    .dropdown-menu {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0;
+      box-shadow: 0 12px 30px rgba(28, 24, 20, 0.08);
+      padding: 1rem;
+    }
+
+    .dropdown-menu .form-check-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: none;
+      color: var(--ink-soft);
+    }
+
+    .form-check-input { border-radius: 0; border-color: var(--line); box-shadow: none; }
+    .form-check-input:checked { background-color: var(--brick); border-color: var(--brick); }
+
+    /* ── PREVIEW STAGE + DEVICE / ZOOM CONTROLS ── */
+    #device-toggle {
+      display: inline-flex;
+      border: 1px solid var(--line);
+    }
+
+    #device-toggle button[data-device] {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      color: var(--muted);
+      font-size: 0.64rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    #device-toggle button[data-device] + button[data-device] {
+      border-left: 1px solid var(--line);
+    }
+
+    #device-toggle button[data-device].active {
+      background: var(--ink);
+      color: var(--sand);
+    }
+
+    #zoom-select, #mobile-width-select {
+      width: auto;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      padding: 0.45rem 2rem 0.45rem 0.8rem;
+    }
+
+    /* The visible preview box — height must match PREVIEW_HEIGHT in the
+       script; width/scale are set inline by applyPreviewFrame() */
+    #frame-stage {
+      background: var(--sand-deep);
+      border: 1px solid var(--line);
+      height: 640px;
+      overflow: hidden;
+      margin: 0 auto;
+      transition: width 0.35s ease;
+    }
+
+    #render-frame {
+      border: none;
+      background: #ffffff;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── TEMPLATE OFFCANVAS ── */
+    .offcanvas {
+      background: var(--sand);
+      border-left: 1px solid var(--line);
+    }
+
+    .offcanvas-header {
+      border-bottom: 1px solid var(--line);
+      padding: 1.6rem 1.8rem;
+    }
+
+    .offcanvas-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.5rem;
+      color: var(--ink);
+    }
+
+    .offcanvas-body { padding: 1.8rem; }
+
+    .btn-close { box-shadow: none; }
+
+    .template-thumb-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 0.8rem;
+      transition: border-color 0.2s;
+    }
+
+    .template-thumb-card:hover { border-color: var(--brick); }
+
+    .template-thumb-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .template-info { padding: 1.1rem 0.2rem 2rem; }
+
+    .template-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.35rem;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .template-desc {
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-bottom: 0.9rem;
+    }
+
+    /* ── COLOUR PILLS (buildColourTags) ── */
+    #colour-tag-space {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .colour-frame-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.3rem 0.85rem 0.3rem 0.35rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .colour-frame-pill:hover { border-color: var(--brick); }
+    .colour-frame-pill:hover .colour-label-text { color: var(--brick); }
+
+    .colour-badge-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .colour-label-text {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+      transition: color 0.2s;
+    }
+
+    #colour-tag-space-empty,
+    #token-grid-empty {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      padding: 1rem 1.2rem;
+      text-align: center;
+    }
+
+    /* ── IMAGE CARDS (buildImgTags) ── */
+    #img-tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    .image-preview-card {
+      position: relative;
+      width: 96px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 0.45rem;
+      transition: border-color 0.2s;
+    }
+
+    .image-preview-card:hover { border-color: var(--brick); }
+
+    .preview-img-element {
+      width: 100%;
+      height: 58px;
+      object-fit: contain;
+      display: block;
+      background: #ffffff;
+    }
+
+    .image-name-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+
+    .remove-image-tag {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--sand);
+      border: none;
+      border-radius: 50%;
+      padding: 0;
+      line-height: 1;
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .remove-image-tag:hover { color: var(--brick); }
+
+    .upload-trigger-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 96px;
+      border: 1px dashed var(--line);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .upload-trigger-card:hover { border-color: var(--brick); }
+    .upload-trigger-card:hover .plus-icon-wrapper { color: var(--brick); }
+
+    .plus-icon-wrapper {
+      color: var(--muted);
+      font-size: 1.3rem;
+      transition: color 0.2s;
+    }
+
+    /* ── VARIABLE TAGS (buildVarTags) ── */
+    #token-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .var-tag {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      color: var(--ink-soft);
+      background: transparent;
+      border: 1px solid var(--line);
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .var-tag:hover {
+      color: var(--brick);
+      border-color: var(--brick);
+    }
+
+    .var-tag::before { content: '{ '; color: var(--muted); }
+    .var-tag::after  { content: ' }'; color: var(--muted); }
+
+    /* ── MBB COLOUR TABLE (DataTables) ── */
+    #mbb-colour-table {
+      border-collapse: collapse;
+      width: 100% !important;
+    }
+
+    #mbb-colour-table thead th {
+      background: transparent;
+      border-bottom: 1px solid var(--ink) !important;
+      border-top: none;
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.8rem 0.9rem;
+    }
+
+    #mbb-colour-table tbody td {
+      border-bottom: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      padding: 0.65rem 0.9rem;
+      background: transparent;
+    }
+
+    #mbb-colour-table tbody tr {
+      cursor: pointer;               /* rows copy their hex on click */
+      transition: background 0.15s;
+    }
+
+    #mbb-colour-table tbody tr:hover,
+    #mbb-colour-table tbody tr:hover td {
+      background: var(--sand-deep);
+    }
+
+    .colour-frame {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .elipses-cell {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+      font-size: 0.66rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .dataTables_scrollBody::-webkit-scrollbar { width: 8px; }
+    .dataTables_scrollBody::-webkit-scrollbar-track { background: transparent; }
+    .dataTables_scrollBody::-webkit-scrollbar-thumb { background: var(--line); }
+
+    /* ── TABS (colour wheel / brand colours panel) ── */
+    .nav-tabs {
+      border-bottom: 1px solid var(--line);
+      gap: 0.2rem;
+    }
+
+    .nav-tabs .nav-link {
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.66rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.7rem 1rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .nav-tabs .nav-link:hover { color: var(--ink); }
+
+    .nav-tabs .nav-link.active {
+      background: transparent;
+      color: var(--brick);
+      border-bottom-color: var(--brick);
+    }
+
+    #colour-info-section { cursor: pointer; }
+
+    #hex-value {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── MODALS ── */
+    .modal-content {
+      background: var(--sand);
+      border: 1px solid var(--line);
+      border-radius: 0;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--line);
+      padding: 1.4rem 1.8rem;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 1.4rem;
+      color: var(--ink);
+    }
+
+    .modal-body { padding: 1.8rem; }
+
+    .modal-footer {
+      border-top: 1px solid var(--line);
+      padding: 1rem 1.8rem;
+    }
+
+    #myAwesomeDropzone,
+    .dropzone {
+      background: var(--paper);
+      border: 1px dashed var(--line);
+      border-radius: 0;
+      min-height: 180px;
+      transition: border-color 0.2s;
+    }
+
+    #myAwesomeDropzone:hover,
+    .dropzone.dz-drag-hover {
+      border-color: var(--brick);
+    }
+
+    .dropzone .dz-message {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .dropzone .dz-preview .dz-image {
+      border-radius: 0;
+      border: 1px solid var(--line);
+    }
+
+    /* ── TOASTR ── */
+    #toast-container > div {
+      background: var(--ink) !important;
+      color: var(--sand);
+      border-radius: 0;
+      box-shadow: 0 10px 25px rgba(28, 24, 20, 0.25);
+      opacity: 1;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      border-left: 2px solid var(--brick);
+    }
+
+    #toast-container > .toast-success,
+    #toast-container > .toast-error { background-image: none !important; }
+
+    /* ── SEND ROW ── */
+    .send-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    #email-address { max-width: 320px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 1.5rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--ink); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1200px) {
+      .renderer-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+
+      #sidebar-wrapper {
+        width: 100%;
+        height: auto;
+        position: fixed;
+        flex-direction: row;
+        align-items: center;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: 0.8rem 1.2rem;
+      }
+
+      .sidebar-logo { padding: 0; border-bottom: none; }
+      nav.sidebar-nav { padding: 0; display: flex; gap: 1rem; }
+      nav.sidebar-nav a { padding: 0.4rem 0.6rem; }
+      nav.sidebar-nav a::before { display: none; }
+      .sidebar-footer { display: none; }
+      .corner-label { display: none; }
+
+      #page-content-wrapper { margin-left: 0; margin-top: 60px; }
+
+      .renderer-header, .renderer-grid { padding-left: 1.5rem; padding-right: 1.5rem; }
+      footer { flex-direction: column; gap: 0.5rem; padding: 1.5rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner-label">Est. Leeds</div>
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar-wrapper">
+    <div class="sidebar-logo">
+      <a href="index.html">
+        <img src="assets/MB-Brickwork-logo.png" alt="MB Brickwork"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+        <div class="logo-text" style="display:none">MB<br><span>Brickwork</span></div>
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="index.html">Home</a>
+      <a href="projects.html">Projects</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="email-renderer.html" class="current">Email Renderer</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      Masonry &amp; Brickwork<br>Leeds, UK
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="page-content-wrapper">
+    <main>
+
+      <!-- HEADER -->
+      <div class="renderer-header">
+        <div>
+          <p class="section-label">Email engine</p>
+          <h1>Build emails that<br>hold their <em>shape.</em></h1>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn-mbb" id="open-templates-oc">
+            <i class="uil uil-layer-group"></i>&nbsp; Templates
+          </button>
+        </div>
+      </div>
+
+      <!-- WORKSPACE -->
+      <div class="renderer-grid">
+
+        <!-- LEFT: editor + preview -->
+        <div>
+
+          <!-- Formatting toolbar -->
+          <div class="editor-toolbar">
+            <button type="button" id="bold-btn" title="Bold"><i class="uil uil-bold"></i></button>
+            <button type="button" id="italic-btn" title="Italic"><i class="uil uil-italic"></i></button>
+            <button type="button" id="underline-btn" title="Underline"><i class="uil uil-underline"></i></button>
+
+            <!-- Link tool -->
+            <div class="dropdown">
+              <button type="button" id="link-btn" title="Insert link"
+                      data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <i class="uil uil-link"></i>
+              </button>
+              <div class="dropdown-menu p-3" style="min-width: 280px;">
+                <div class="d-flex gap-3 mb-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="link-type" id="link-type-web" value="web" checked>
+                    <label class="form-check-label" for="link-type-web">Web</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="link-type" id="link-type-email" value="email">
+                    <label class="form-check-label" for="link-type-email">Email</label>
+                  </div>
+                </div>
+                <input type="text" class="form-control mb-2" id="link-url-input" placeholder="https://example.com">
+                <button type="button" class="btn-mbb-primary w-100" id="apply-link-btn">Apply link</button>
+              </div>
+            </div>
+
+            <div class="vr mx-2" style="opacity: 0.4;"></div>
+
+            <label for="font-size" class="mb-0">Size</label>
+            <input type="number" class="form-control" id="font-size" min="1" max="200" value="14">
+
+            <div class="ms-auto d-flex align-items-center gap-2">
+              <!-- Device / zoom controls -->
+              <div id="device-toggle" role="group" aria-label="Preview device">
+                <button type="button" data-device="desktop" class="active">Desktop</button>
+                <button type="button" data-device="mobile">Mobile</button>
+              </div>
+
+              <select class="form-select d-none" id="mobile-width-select" title="Device width">
+                <option value="320">320 px</option>
+                <option value="375" selected>375 px</option>
+                <option value="414">414 px</option>
+                <option value="430">430 px</option>
+              </select>
+
+              <select class="form-select" id="zoom-select" title="Zoom">
+                <option value="50">50%</option>
+                <option value="75">75%</option>
+                <option value="100" selected>100%</option>
+                <option value="125">125%</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live preview (editable) -->
+          <div id="frame-stage">
+            <iframe id="render-frame" title="Email preview"></iframe>
+          </div>
+
+          <!-- HTML source -->
+          <div class="renderer-panel mt-4">
+            <div class="renderer-panel-header d-flex justify-content-between align-items-center">
+              <span>HTML Source</span>
+              <span class="text-lowercase" style="letter-spacing: 0.05em;">edits sync both ways</span>
+            </div>
+            <div class="renderer-panel-body">
+              <textarea id="html-input" class="form-control" spellcheck="false"
+                        placeholder="Paste your email HTML here, or pick a template…"></textarea>
+            </div>
+          </div>
+
+          <!-- Send -->
+          <div class="send-row mt-4">
+            <label for="email-address" class="mb-0">Send test to</label>
+            <input type="email" class="form-control" id="email-address" placeholder="name@example.com">
+            <button type="button" id="send-btn">Send email</button>
+          </div>
+
+        </div>
+
+        <!-- RIGHT: detected assets + colour tools -->
+        <aside>
+
+          <!-- Detected colours -->
+          <div class="renderer-panel">
+            <div class="renderer-panel-header d-flex justify-content-between align-items-center">
+              <span>Colours</span>
+              <span id="colour-count">0</span>
+            </div>
+            <div class="renderer-panel-body">
+              <div id="colour-tag-space-empty">No colours detected yet</div>
+              <div id="colour-tag-space" class="d-none"></div>
+            </div>
+          </div>
+
+          <!-- Images -->
+          <div class="renderer-panel">
+            <div class="renderer-panel-header d-flex justify-content-between align-items-center">
+              <span>Images</span>
+              <button type="button" class="btn-mbb py-1 px-2" id="add-img-btn" title="Add images">
+                <i class="uil uil-plus"></i>
+              </button>
+            </div>
+            <div class="renderer-panel-body">
+              <div id="img-tag-container"></div>
+            </div>
+          </div>
+
+          <!-- Template variables -->
+          <div class="renderer-panel">
+            <div class="renderer-panel-header d-flex justify-content-between align-items-center">
+              <span>Variables</span>
+              <span id="var-count">0</span>
+            </div>
+            <div class="renderer-panel-body">
+              <div id="token-grid-empty">No variables detected yet</div>
+              <div id="token-grid" class="d-none"></div>
+            </div>
+          </div>
+
+          <!-- Colour tools: wheel + brand palette -->
+          <div class="renderer-panel">
+            <div class="renderer-panel-header d-flex justify-content-between align-items-center">
+              <span>Palette</span>
+              <button type="button" class="btn-mbb py-1 px-2" id="add-colour-btn" title="Colour picker">
+                <i class="uil uil-palette"></i>
+              </button>
+            </div>
+            <div class="renderer-panel-body">
+              <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-wheel" type="button" role="tab">Wheel</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-brand" type="button" role="tab">Brand</button>
+                </li>
+              </ul>
+
+              <div class="tab-content pt-3">
+                <div class="tab-pane fade show active" id="tab-wheel" role="tabpanel">
+                  <div id="colour-wheel"></div>
+                  <div id="colour-info-section" class="d-flex align-items-center gap-2 mt-3" title="Click to copy">
+                    <input type="text" class="form-control" id="hex-value" readonly value="#8B3A2A">
+                    <i class="uil uil-copy" style="color: var(--muted);"></i>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="tab-brand" role="tabpanel">
+                  <table id="mbb-colour-table" class="w-100"></table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+
+    </main>
+
+    <footer>
+      <span>&copy; 2026 MBBrickwork</span>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+  </div>
+
+  <!-- TEMPLATE OFFCANVAS -->
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="template-oc" style="width: 420px;">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Email templates</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <div id="template-generic"></div>
+      <div id="template-table"></div>
+      <div id="template-timeline"></div>
+    </div>
+  </div>
+
+  <!-- IMAGE UPLOAD MODAL -->
+  <div class="modal fade" id="image-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add images</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="/Email/UploadImage" class="dropzone" id="myAwesomeDropzone">
+            <div class="dz-message">Drop images here or click to browse</div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-mbb" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn-mbb-primary" id="add-images-btn">Add images</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD COLOUR MODAL -->
+  <div class="modal fade" id="add-colour-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Colour picker</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0" style="font-size: 0.72rem; color: var(--muted);">
+            Use the wheel in the Palette panel, or click any detected colour to copy its hex code.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.3/dist/min/dropzone.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+  <script>
+/* =========================================================================
+   EMAIL RENDERER — page script (single-file build)
+   -------------------------------------------------------------------------
+   Contents:
+     0.  Vendor setup + MBB data (templates, thumbnails, brand colours)
+         + helpers the renderer expects (buildColourWheel, table helpers)
+     1.  Global state
+     2.  Page initialisation
+     3.  Two-way preview renderer (textarea <-> editable iframe)
+     4.  Preview controls (device toggle / mobile width / zoom)
+     5.  Template offcanvas
+     6.  Formatting toolbar (bold / italic / underline)
+     7.  Link tool
+     8.  Font size tool + preview selection tracking
+     9.  Source analysis (extract colours / images / variables from the HTML)
+     10. Side-panel tag builders (colour pills, image cards, variable tags)
+         + image upload (dropzone -> tags)
+     11. MBB colour table (DataTables)
+     12. Send email
+     13. Clipboard copy + misc UI events
+   ========================================================================= */
+
+
+/* =========================================================================
+   0. VENDOR SETUP + MBB DATA + HELPERS
+   ========================================================================= */
+
+Dropzone.autoDiscover = false;
+new Dropzone('#myAwesomeDropzone', {
+    url: '/Email/UploadImage',
+    autoProcessQueue: false,
+    acceptedFiles: 'image/*',
+    addRemoveLinks: true
+});
+
+toastr.options = {
+    positionClass: 'toast-bottom-right',
+    timeOut: 2200,
+    progressBar: false,
+    closeButton: false
+};
+
+/* ---- Brand colours shown in the Palette > Brand tab ---- */
+var mbbColours = [
+    { color: '#8B3A2A', name: 'Brick' },
+    { color: '#6F2E21', name: 'Brick Dark' },
+    { color: '#1C1814', name: 'Ink' },
+    { color: '#5A524A', name: 'Ink Soft' },
+    { color: '#F4F0EB', name: 'Sand' },
+    { color: '#ECE6DE', name: 'Sand Deep' },
+    { color: '#FAF8F4', name: 'Paper' },
+    { color: '#A09890', name: 'Muted' },
+    { color: '#D8D2CA', name: 'Line' },
+    { color: '#3E5C4B', name: 'Moss' },
+    { color: '#2F4858', name: 'Slate' },
+    { color: '#FFFFFF', name: 'White' }
+];
+
+/* ---- Email templates (MB Brickwork themed, inline-styled for clients) ---- */
+
+const email_generic_html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0; padding:0; background-color:#F4F0EB;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F4F0EB;">
+    <tr>
+      <td align="center" style="padding:36px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%; background-color:#FFFFFF; border:1px solid #D8D2CA;">
+          <tr>
+            <td style="padding:28px 40px; border-bottom:1px solid #D8D2CA; font-family:Georgia, 'Times New Roman', serif; font-size:22px; color:#1C1814;">
+              MB <span style="color:#8B3A2A;">Brickwork</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.7; color:#5A524A;">
+              <p style="margin:0 0 16px;">Dear {customer_name},</p>
+              <p style="margin:0 0 16px;">{email_body}</p>
+              <p style="margin:0;">Kind regards,<br>{sender_name}<br><span style="color:#8B3A2A;">MB Brickwork</span></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 40px; border-top:1px solid #D8D2CA; font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#A09890;">
+              Masonry &amp; Brickwork &mdash; Leeds, UK
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+const email_table_html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0; padding:0; background-color:#F4F0EB;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F4F0EB;">
+    <tr>
+      <td align="center" style="padding:36px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%; background-color:#FFFFFF; border:1px solid #D8D2CA;">
+          <tr>
+            <td style="padding:28px 40px; border-bottom:1px solid #D8D2CA; font-family:Georgia, 'Times New Roman', serif; font-size:22px; color:#1C1814;">
+              MB <span style="color:#8B3A2A;">Brickwork</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px 12px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.7; color:#5A524A;">
+              <p style="margin:0 0 16px;">Dear {customer_name},</p>
+              <p style="margin:0 0 16px;">Here are the details of your quote:</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #D8D2CA; font-family:Arial, Helvetica, sans-serif; font-size:13px; color:#5A524A;">
+                <tr>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA; background-color:#FAF8F4; letter-spacing:1px; text-transform:uppercase; font-size:10px; color:#A09890;">Quote number</td>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA;">{quote_number}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA; background-color:#FAF8F4; letter-spacing:1px; text-transform:uppercase; font-size:10px; color:#A09890;">Date</td>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA;">{quote_date}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA; background-color:#FAF8F4; letter-spacing:1px; text-transform:uppercase; font-size:10px; color:#A09890;">Site address</td>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA;">{site_address}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA; background-color:#FAF8F4; letter-spacing:1px; text-transform:uppercase; font-size:10px; color:#A09890;">Estimated start</td>
+                  <td style="padding:12px 16px; border-bottom:1px solid #D8D2CA;">{start_date}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 16px; background-color:#FAF8F4; letter-spacing:1px; text-transform:uppercase; font-size:10px; color:#A09890;">Quote total</td>
+                  <td style="padding:12px 16px; color:#8B3A2A; font-weight:bold;">{quote_total}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 40px; border-top:1px solid #D8D2CA; font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#A09890;">
+              Masonry &amp; Brickwork &mdash; Leeds, UK
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+const email_timeline_html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0; padding:0; background-color:#F4F0EB;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F4F0EB;">
+    <tr>
+      <td align="center" style="padding:36px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%; background-color:#FFFFFF; border:1px solid #D8D2CA;">
+          <tr>
+            <td style="padding:28px 40px; border-bottom:1px solid #D8D2CA; font-family:Georgia, 'Times New Roman', serif; font-size:22px; color:#1C1814;">
+              MB <span style="color:#8B3A2A;">Brickwork</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:36px 40px 8px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.7; color:#5A524A;">
+              <p style="margin:0 0 16px;">Dear {customer_name},</p>
+              <p style="margin:0 0 16px;">We have received your order <strong style="color:#1C1814;">{order_number}</strong> and it is now being validated. Here is where things stand:</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px 40px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:Arial, Helvetica, sans-serif;">
+                <tr>
+                  <td align="center" width="25%">
+                    <div style="width:14px; height:14px; border-radius:7px; background-color:#8B3A2A; margin:0 auto;"></div>
+                    <p style="margin:10px 0 0; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#1C1814;">Received</p>
+                  </td>
+                  <td align="center" width="25%">
+                    <div style="width:14px; height:14px; border-radius:7px; background-color:#8B3A2A; margin:0 auto;"></div>
+                    <p style="margin:10px 0 0; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#8B3A2A;">Validating</p>
+                  </td>
+                  <td align="center" width="25%">
+                    <div style="width:14px; height:14px; border-radius:7px; background-color:#D8D2CA; margin:0 auto;"></div>
+                    <p style="margin:10px 0 0; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#A09890;">Scheduled</p>
+                  </td>
+                  <td align="center" width="25%">
+                    <div style="width:14px; height:14px; border-radius:7px; background-color:#D8D2CA; margin:0 auto;"></div>
+                    <p style="margin:10px 0 0; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#A09890;">Complete</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 36px; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:1.7; color:#5A524A;">
+              <p style="margin:0;">We will be in touch on {contact_date} to confirm the schedule.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 40px; border-top:1px solid #D8D2CA; font-family:Arial, Helvetica, sans-serif; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#A09890;">
+              Masonry &amp; Brickwork &mdash; Leeds, UK
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+/* ---- Template thumbnails (inline SVG data URIs; already data:-prefixed,
+        so buildTemplateOffCanvas() uses them unchanged) ---- */
+
+function mbbSvgThumb(inner) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">' +
+        '<rect width="320" height="180" fill="#F4F0EB"/>' +
+        '<rect x="60" y="16" width="200" height="148" fill="#FFFFFF" stroke="#D8D2CA"/>' +
+        '<rect x="78" y="32" width="52" height="8" fill="#8B3A2A"/>' +
+        inner +
+        '</svg>'
+    );
+}
+
+const email_generic_asset_base64 = mbbSvgThumb(
+    '<rect x="78" y="56" width="164" height="5" fill="#D8D2CA"/>' +
+    '<rect x="78" y="68" width="164" height="5" fill="#D8D2CA"/>' +
+    '<rect x="78" y="80" width="120" height="5" fill="#D8D2CA"/>' +
+    '<rect x="78" y="100" width="140" height="5" fill="#ECE6DE"/>' +
+    '<rect x="78" y="112" width="90" height="5" fill="#ECE6DE"/>'
+);
+
+const email_asset_table_base64 = mbbSvgThumb(
+    '<rect x="78" y="56" width="164" height="14" fill="#FAF8F4" stroke="#D8D2CA"/>' +
+    '<rect x="78" y="70" width="164" height="14" fill="#FFFFFF" stroke="#D8D2CA"/>' +
+    '<rect x="78" y="84" width="164" height="14" fill="#FAF8F4" stroke="#D8D2CA"/>' +
+    '<rect x="78" y="98" width="164" height="14" fill="#FFFFFF" stroke="#D8D2CA"/>' +
+    '<rect x="78" y="112" width="164" height="14" fill="#FAF8F4" stroke="#D8D2CA"/>'
+);
+
+const email_timeline_asset_base64 = mbbSvgThumb(
+    '<rect x="78" y="56" width="164" height="5" fill="#D8D2CA"/>' +
+    '<rect x="78" y="68" width="130" height="5" fill="#D8D2CA"/>' +
+    '<line x1="90" y1="104" x2="230" y2="104" stroke="#D8D2CA" stroke-width="2"/>' +
+    '<circle cx="94" cy="104" r="7" fill="#8B3A2A"/>' +
+    '<circle cx="138" cy="104" r="7" fill="#8B3A2A"/>' +
+    '<circle cx="182" cy="104" r="7" fill="#ECE6DE" stroke="#D8D2CA"/>' +
+    '<circle cx="226" cy="104" r="7" fill="#ECE6DE" stroke="#D8D2CA"/>'
+);
+
+/* ---- Colour wheel (Palette > Wheel tab) ---- */
+
+function hsvToRgb(h, s, v) {
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+}
+
+function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(function (n) {
+        return n.toString(16).padStart(2, '0').toUpperCase();
+    }).join('');
+}
+
+function buildColourWheel() {
+    const container = document.getElementById('colour-wheel');
+    if (!container || container.querySelector('canvas')) return;
+
+    const size = 180;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    canvas.style.cssText = 'display:block; margin:0 auto; cursor:crosshair;';
+    container.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    const radius = size / 2;
+    const image = ctx.createImageData(size, size);
+
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const dx = x - radius, dy = y - radius;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const idx = (y * size + x) * 4;
+
+            if (dist > radius) continue; // transparent outside the wheel
+
+            const hue = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+            const rgb = hsvToRgb(hue, Math.min(1, dist / radius), 1);
+            image.data[idx] = rgb[0];
+            image.data[idx + 1] = rgb[1];
+            image.data[idx + 2] = rgb[2];
+            // soften the rim so the edge isn't aliased
+            image.data[idx + 3] = dist > radius - 1.5 ? Math.round(((radius - dist) / 1.5) * 255) : 255;
+        }
+    }
+    ctx.putImageData(image, 0, 0);
+
+    canvas.addEventListener('click', function (e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.round(e.clientX - rect.left);
+        const y = Math.round(e.clientY - rect.top);
+        const dx = x - radius, dy = y - radius;
+        if (Math.sqrt(dx * dx + dy * dy) > radius) return;
+
+        const p = ctx.getImageData(x, y, 1, 1).data;
+        $('#hex-value').val(rgbToHex(p[0], p[1], p[2]));
+    });
+}
+
+/* ---- DataTables helpers the colour table wires up ---- */
+
+function addTablePlaceHolder() {
+    // Data is supplied locally (no ajax), so no loading placeholder is needed
+}
+
+function applyPaginationAndCount() {
+    // dom: "t" hides DataTables' own info/pagination — nothing to sync
+}
+
+/* ---- Clipboard that also works outside secure contexts (file://) ---- */
+
+function mbbCopyToClipboard(text, label) {
+    const message = label || ('Copied ' + text + ' to clipboard');
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+            .then(function () { toastr.success(message); })
+            .catch(function () { toastr.error('Clipboard unavailable'); });
+        return;
+    }
+
+    // Fallback: hidden textarea + execCommand
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed; opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        toastr.success(message);
+    } catch (e) {
+        toastr.error('Clipboard unavailable');
+    }
+    document.body.removeChild(ta);
+}
+
+
+/* =========================================================================
+   1. GLOBAL STATE
+   ========================================================================= */
+
+// Images uploaded through the dropzone modal, shown as removable tags:
+// [{ src: <base64 data URI>, alt: <file name> }]
+var images = [];
+
+// Current device/zoom settings for the preview frame
+var previewState = { device: 'desktop', zoom: 100, mobileWidth: 375 };
+
+// On-screen preview height; must match the #frame-stage / #render-frame CSS height
+var PREVIEW_HEIGHT = 640;
+
+// DataTable instance for #mbb-colour-table
+var colourTable = null;
+
+// Selection snapshot taken when the link dropdown opens (link tool only)
+let savedLinkRange = null;
+
+// Live selection target kept up to date by initPreviewSelectionTracking();
+// consumed by the font size tool
+let savedSelectionRange = null;
+
+
+/* =========================================================================
+   2. PAGE INITIALISATION
+   ========================================================================= */
+
+$(document).ready(function () {
+    buildColourWheel();
+    buildMbbColourTable(mbbColours);
+    initPreviewControls();
+    buildTemplateOffCanvas();
+    initImageUpload();
+
+    // Paint the image tag panel (and its "+" card) from the initial source —
+    // otherwise it stays empty until the first keyup in the textarea
+    refreshImgTags();
+
+    // Populate the colour/variable panels from the initial source too
+    $('#html-input').trigger('keyup');
+
+    // Toolbar bindings on parent-page elements — bind once
+    initFormattingToolbar();
+    initLinkTool();
+    initFontSizeTool();
+
+    // Bindings on the iframe's document — also re-run on every preview render
+    bindPreviewDocumentEvents();
+});
+
+// Everything that binds to the iframe's *document* is grouped here.
+// The renderer below replaces the whole document on every re-render
+// (frame.srcdoc = ...), which silently destroys these bindings — so the
+// renderer's 'load' handler calls this again after each render.
+function bindPreviewDocumentEvents() {
+    initToolbarStateTracking();
+    initPreviewSelectionTracking();
+}
+
+
+/* =========================================================================
+   3. TWO-WAY PREVIEW RENDERER  (textarea <-> editable iframe)
+   ========================================================================= */
+
+(function () {
+    const input = document.getElementById('html-input');
+    const frame = document.getElementById('render-frame');
+    if (!input || !frame) return;
+
+    // Open with the generic template so the workspace isn't empty
+    if (!input.value.trim()) input.value = email_generic_html;
+
+    let inputTimer = null;
+    let frameTimer = null;
+
+    function renderFromInput() {
+        frame.srcdoc = input.value;
+    }
+
+    input.addEventListener('input', function () {
+        clearTimeout(inputTimer);
+        inputTimer = setTimeout(renderFromInput, 200);
+    });
+
+    frame.addEventListener('load', function () {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+
+        try { doc.designMode = 'on'; }          // makes the whole preview editable
+        catch (e) { return; }
+
+        doc.addEventListener('input', function () {
+            clearTimeout(frameTimer);
+            frameTimer = setTimeout(function () {
+                // assigning .value does NOT fire the textarea 'input' event,
+                // so this never loops back into renderFromInput()
+                input.value = serialize(doc);
+            }, 200);
+        });
+
+        // srcdoc created a brand-new document — re-attach the document-level
+        // toolbar bindings (selection tracking + button active states)
+        bindPreviewDocumentEvents();
+    });
+
+    function serialize(doc) {
+        const dt = doc.doctype ? '<!DOCTYPE ' + doc.doctype.name + '>\n' : '';
+        return dt + doc.documentElement.outerHTML;
+    }
+
+    // initial paint
+    renderFromInput();
+})();
+
+function syncPreviewToInput(doc) {
+    // Write the edited markup back to the source textarea, without firing
+    // any input listener that re-renders the preview (that would destroy
+    // the user's selection mid-editing)
+    $('#html-input').val(doc.documentElement.outerHTML);
+}
+
+
+/* =========================================================================
+   4. PREVIEW CONTROLS  (device toggle / mobile width / zoom)
+   ========================================================================= */
+
+function initPreviewControls() {
+    // Seed state from the controls so the UI and state can't disagree
+    // (Firefox restores form values across F5)
+    previewState.zoom = parseInt($('#zoom-select').val(), 10) || 100;
+    previewState.mobileWidth = parseInt($('#mobile-width-select').val(), 10) || 375;
+
+    $('#device-toggle').off('click.preview').on('click.preview', 'button[data-device]', function () {
+        $('#device-toggle button[data-device]').removeClass('active');
+        $(this).addClass('active');
+        previewState.device = $(this).data('device');
+
+        // The width picker only makes sense in mobile view
+        $('#mobile-width-select').toggleClass('d-none', previewState.device !== 'mobile');
+
+        applyPreviewFrame();
+    });
+
+    $('#mobile-width-select').off('change.preview').on('change.preview', function () {
+        previewState.mobileWidth = parseInt($(this).val(), 10) || 375;
+        applyPreviewFrame();
+    });
+
+    $('#zoom-select').off('change.preview').on('change.preview', function () {
+        previewState.zoom = parseInt($(this).val(), 10) || 100;
+        applyPreviewFrame();
+    });
+
+    applyPreviewFrame();
+}
+
+function applyPreviewFrame() {
+    var $stage = $('#frame-stage');
+    var $frame = $('#render-frame');
+    if (!$stage.length || !$frame.length) return;
+
+    var z = previewState.zoom / 100;
+    var isMobile = previewState.device === 'mobile';
+
+    // The stage is the visible box. Desktop stays fluid (100%) so it tracks
+    // the panel with no measuring; mobile is the device width times zoom.
+    // % <-> px width values interpolate, so the toggle animates smoothly.
+    $stage.css('width', isMobile
+        ? (previewState.mobileWidth * z) + 'px'
+        : '100%');
+
+    // Mobile keeps an honest viewport: the email is laid out at exactly the
+    // chosen device width and scaled visually, so its media queries behave
+    // as they would on the real device. Desktop lays out oversized/undersized
+    // and scales back so the visible box always fills the stage exactly.
+    $frame.css({
+        'width': isMobile ? previewState.mobileWidth + 'px' : (100 / z) + '%',
+        'height': (PREVIEW_HEIGHT / z) + 'px',
+        'transform': 'scale(' + z + ')',
+        'transform-origin': 'top left'
+    });
+}
+
+
+/* =========================================================================
+   5. TEMPLATE OFFCANVAS
+   ========================================================================= */
+
+$('#open-templates-oc').on('click', function () {
+    $('#template-oc').offcanvas('show');
+});
+
+function buildTemplateOffCanvas() {
+    const toDataUri = function (base64Str) {
+        return base64Str.startsWith('data:')
+            ? base64Str
+            : `data:image/png;base64,${base64Str}`;
+    };
+
+    const templates = [
+        {
+            containerId: '#template-generic',
+            key: 'generic',
+            title: 'Generic Email',
+            description: 'A simple, flexible email for general customer communication.',
+            asset: email_generic_asset_base64
+        },
+        {
+            containerId: '#template-table',
+            key: 'table',
+            title: 'Table Email',
+            description: 'Presents structured information to the customer in a clear tabular layout.',
+            asset: email_asset_table_base64
+        },
+        {
+            containerId: '#template-timeline',
+            key: 'timeline',
+            title: 'Timeline Email',
+            description: 'Sent to the customer when a new order is received and being validated. Includes the order status timeline.',
+            asset: email_timeline_asset_base64
+        }
+    ];
+
+    templates.forEach(function (template) {
+        const $container = $(template.containerId);
+        $container.empty(); // rebuild cleanly each time the offcanvas is populated
+
+        const $thumb = $('<div class="template-thumb-card"></div>')
+            .append($('<img class="template-thumb-img" />').attr({ src: toDataUri(template.asset), alt: template.title }));
+
+        const $info = $('<div class="template-info"></div>')
+            .append($('<div class="template-title"></div>').text(template.title))
+            .append($('<p class="template-desc"></p>').text(template.description))
+            .append(
+                $('<div class="template-actions"></div>')
+                    .append($(`<button type="button" class="btn btn-mbb btn-mbb-primary use-template" data-template="${template.key}">Use template</button>`))
+            );
+
+        $container.append($thumb, $info);
+    });
+}
+
+$(document).on('click', '.use-template', function () {
+    const templates = {
+        'generic': email_generic_html,
+        'table': email_table_html,
+        'timeline': email_timeline_html
+    };
+
+    let templateKey = $(this).attr('data-template');
+
+    if (templates[templateKey]) {
+        let $input = $('#html-input');
+        $input.val(templates[templateKey]);
+        let nativeInput = $input[0];
+        if (nativeInput) {
+            let event = new Event('input', { bubbles: true, cancelable: true });
+            nativeInput.dispatchEvent(event);
+        }
+    }
+    $('#html-input').trigger('keyup')
+});
+
+
+/* =========================================================================
+   6. FORMATTING TOOLBAR  (bold / italic / underline)
+   ========================================================================= */
+
+function initFormattingToolbar() {
+    const commands = [
+        { btn: '#bold-btn', command: 'bold' },
+        { btn: '#italic-btn', command: 'italic' },
+        { btn: '#underline-btn', command: 'underline' }
+    ];
+
+    commands.forEach(function (item) {
+        $(item.btn)
+            .off('mousedown.fmt click.fmt')
+            // preventDefault on mousedown so the button doesn't take focus —
+            // otherwise the user's text selection in the iframe collapses
+            // before the click ever fires and the command has nothing to format
+            .on('mousedown.fmt', function (e) {
+                e.preventDefault();
+            })
+            .on('click.fmt', function () {
+                applyFormatting(item.command);
+            });
+    });
+}
+
+function applyFormatting(command) {
+    const iframe = document.getElementById('render-frame');
+    if (!iframe || !iframe.contentDocument) return;
+
+    const doc = iframe.contentDocument;
+
+    if (doc.designMode !== 'on') {
+        doc.designMode = 'on';
+    }
+
+    iframe.contentWindow.focus();
+    doc.execCommand(command, false, null);
+
+    syncPreviewToInput(doc);
+}
+
+// Highlights the toolbar buttons to match the formatting at the cursor.
+// Binds to the iframe document — re-attached after every render via
+// bindPreviewDocumentEvents().
+function initToolbarStateTracking() {
+    const iframe = document.getElementById('render-frame');
+    if (!iframe || !iframe.contentDocument) return;
+
+    $(iframe.contentDocument).off('selectionchange.fmt').on('selectionchange.fmt', function () {
+        const doc = iframe.contentDocument;
+        $('#bold-btn').toggleClass('active', doc.queryCommandState('bold'));
+        $('#italic-btn').toggleClass('active', doc.queryCommandState('italic'));
+        $('#underline-btn').toggleClass('active', doc.queryCommandState('underline'));
+    });
+}
+
+
+/* =========================================================================
+   7. LINK TOOL
+   ========================================================================= */
+
+function initLinkTool() {
+    // Snapshot the iframe selection before the dropdown steals focus.
+    // mousedown fires before Bootstrap's toggle, so the selection is still live.
+    $('#link-btn').off('mousedown.link').on('mousedown.link', function () {
+        savedLinkRange = getPreviewSelectionRange();
+    });
+
+    $('#link-btn').closest('.dropdown')
+        .off('shown.bs.dropdown.link')
+        .on('shown.bs.dropdown.link', function () {
+            $('#link-url-input').trigger('focus');
+        });
+
+    // Swap the placeholder to match the chosen link type
+    $('input[name="link-type"]').off('change.link').on('change.link', function () {
+        const isEmail = $(this).val() === 'email';
+        $('#link-url-input').attr('placeholder', isEmail ? 'name@example.com' : 'https://example.com');
+    });
+
+    $('#apply-link-btn').off('click.link').on('click.link', applyLink);
+
+    $('#link-url-input').off('keydown.link').on('keydown.link', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyLink();
+        }
+    });
+}
+
+function getPreviewSelectionRange() {
+    const win = $('#render-frame').prop('contentWindow');
+    if (!win) return null;
+
+    const sel = win.getSelection();
+    return (sel && sel.rangeCount > 0 && !sel.isCollapsed)
+        ? sel.getRangeAt(0).cloneRange()
+        : null;
+}
+
+function applyLink() {
+    const $frame = $('#render-frame');
+    const doc = $frame.prop('contentDocument');
+    const win = $frame.prop('contentWindow');
+    if (!doc || !win) return;
+
+    const value = $.trim($('#link-url-input').val());
+    if (!value) return;
+
+    const isEmail = $('input[name="link-type"]:checked').val() === 'email';
+
+    let href;
+    if (isEmail) {
+        href = value.startsWith('mailto:') ? value : 'mailto:' + value;
+    } else {
+        // Prepend a protocol if the user typed a bare domain, otherwise
+        // the email client resolves it relative to nothing and it breaks
+        href = /^(https?:|mailto:|tel:)/i.test(value) ? value : 'https://' + value;
+    }
+
+    if (doc.designMode !== 'on') doc.designMode = 'on';
+    win.focus();
+
+    const sel = win.getSelection();
+    if (savedLinkRange) {
+        sel.removeAllRanges();
+        sel.addRange(savedLinkRange);
+    }
+
+    if (sel.rangeCount > 0 && !sel.isCollapsed) {
+        // Text was selected — wrap it in the link
+        doc.execCommand('createLink', false, href);
+    } else {
+        // Nothing selected — insert the link with the typed value as its text
+        const linkText = isEmail ? href.replace(/^mailto:/, '') : value;
+        const linkHtml = $('<a>').attr('href', href).text(linkText)[0].outerHTML;
+        doc.execCommand('insertHTML', false, linkHtml);
+    }
+
+    syncPreviewToInput(doc);
+
+    // Reset and close
+    savedLinkRange = null;
+    $('#link-url-input').val('');
+    $('#link-btn').dropdown('hide');
+}
+
+
+/* =========================================================================
+   8. FONT SIZE TOOL + PREVIEW SELECTION TRACKING
+   ========================================================================= */
+
+// Keeps savedSelectionRange pointing at whatever the user highlighted last.
+// selectionchange only fires while the iframe has focus, so clicking the
+// spinner arrows (focus in the parent page) can't disturb the saved target.
+// Binds to the iframe document — re-attached after every render via
+// bindPreviewDocumentEvents().
+function initPreviewSelectionTracking() {
+    const doc = $('#render-frame').prop('contentDocument');
+    if (!doc) return;
+
+    $(doc).off('selectionchange.tools').on('selectionchange.tools', function () {
+        const sel = doc.getSelection();
+
+        if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+            // A real highlight — this is now the toolbar's target
+            savedSelectionRange = sel.getRangeAt(0).cloneRange();
+        } else {
+            // User clicked to place a bare cursor — drop the old target so
+            // the arrows can't restyle text that's no longer highlighted
+            savedSelectionRange = null;
+        }
+    });
+}
+
+function initFontSizeTool() {
+    $('#font-size')
+        .off('change.font keydown.font')
+        .on('change.font', function () {
+            applyFontSize(false); // spinner/typing: leave focus in the input
+        })
+        .on('keydown.font', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFontSize(true); // Enter: user is done, return focus to the preview
+            }
+        });
+}
+
+function applyFontSize(refocusPreview) {
+    const $frame = $('#render-frame');
+    const doc = $frame.prop('contentDocument');
+    const win = $frame.prop('contentWindow');
+    if (!doc || !win || !savedSelectionRange) return;
+
+    const px = parseInt($('#font-size').val(), 10);
+    if (!px || px < 1 || px > 200) return;
+
+    if (doc.designMode !== 'on') doc.designMode = 'on';
+
+    const sel = win.getSelection();
+    try {
+        sel.removeAllRanges();
+        sel.addRange(savedSelectionRange.cloneRange());
+    } catch (e) {
+        // The saved range pointed into a document that has since been
+        // re-rendered — nothing valid to restyle
+        savedSelectionRange = null;
+        return;
+    }
+    if (sel.rangeCount === 0 || sel.isCollapsed) return;
+
+    // execCommand only understands sizes 1–7, so stamp the selection with
+    // the marker size 7, then swap the generated <font> tags for real
+    // pixel-sized spans (email clients need inline px, not <font size>)
+    doc.execCommand('fontSize', false, '7');
+
+    const newSpans = [];
+    $(doc).find('font[size="7"]').each(function () {
+        const $span = $('<span></span>').css('font-size', px + 'px').html($(this).html());
+        $(this).replaceWith($span);
+        newSpans.push($span[0]);
+    });
+
+    // Re-select the new spans; the selectionchange tracker then adopts this
+    // rebuilt range as the current target, so repeated arrow presses keep working
+    if (newSpans.length) {
+        const range = doc.createRange();
+        range.setStartBefore(newSpans[0]);
+        range.setEndAfter(newSpans[newSpans.length - 1]);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        savedSelectionRange = range.cloneRange();
+    }
+
+    syncPreviewToInput(doc);
+
+    if (refocusPreview) win.focus();
+}
+
+
+/* =========================================================================
+   9. SOURCE ANALYSIS  (extract colours / images / variables from the HTML)
+   ========================================================================= */
+
+// Re-scan the source whenever the user types in the textarea
+$('#html-input').on('keyup', function () {
+    buildColourTags(extractHexColoursFromHTML($(this).val()));
+    buildImgTags(extractImagesFromHTML($(this).val()));
+    buildVarTags(extractDistinctBraceElements($(this).val()));
+});
+
+function extractHexColoursFromHTML(htmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+
+    // Strict regex to capture only 3, 4, 6, or 8-character hex codes
+    const hexRegex = /#([0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\b/g;
+    const uniqueColours = new Set();
+
+    const styledElements = doc.querySelectorAll('[style]');
+
+    styledElements.forEach(element => {
+        const styleAttr = element.getAttribute('style');
+        const matches = styleAttr.match(hexRegex);
+
+        if (matches) {
+            matches.forEach(colour => {
+                let cleanColour = colour.trim().toUpperCase();
+
+                // Expand shorthand 3-character hex (#FFF -> #FFFFFF)
+                if (cleanColour.length === 4) {
+                    cleanColour = '#' + cleanColour[1] + cleanColour[1] +
+                        cleanColour[2] + cleanColour[2] +
+                        cleanColour[3] + cleanColour[3];
+                }
+                // Expand shorthand 4-character hex with alpha (#F00F -> #FF0000FF)
+                else if (cleanColour.length === 5) {
+                    cleanColour = '#' + cleanColour[1] + cleanColour[1] +
+                        cleanColour[2] + cleanColour[2] +
+                        cleanColour[3] + cleanColour[3] +
+                        cleanColour[4] + cleanColour[4];
+                }
+
+                uniqueColours.add(cleanColour);
+            });
+        }
+    });
+    // Returns a plain array of strings: ["#FFFFFF", "#8B3A2A", ...]
+    return Array.from(uniqueColours);
+}
+
+function extractImagesFromHTML(htmlString) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+
+    const imgElements = doc.querySelectorAll('img');
+    const uniqueImages = new Map(); // keyed by src so duplicates are still dropped
+
+    imgElements.forEach(img => {
+        const src = img.getAttribute('src');
+
+        if (src && src.trim() !== '' && !uniqueImages.has(src.trim())) {
+            uniqueImages.set(src.trim(), {
+                src: src.trim(),
+                alt: (img.getAttribute('alt') || '').trim()
+            });
+        }
+    });
+
+    return Array.from(uniqueImages.values()); // [{ src, alt }, ...]
+}
+
+function extractDistinctBraceElements(text) {
+    const braceRegex = /{[^}]+}/g;
+    const matches = text.match(braceRegex);
+
+    if (!matches) return [];
+
+    // Filter out matches that contain a colon (indicating CSS style rules)
+    const filteredMatches = matches.filter(match => !match.includes(':'));
+
+    // Return unique/distinct matches
+    return Array.from(new Set(filteredMatches));
+}
+
+
+/* =========================================================================
+   10. SIDE-PANEL TAG BUILDERS  (colour pills, image cards, variable tags)
+       + IMAGE UPLOAD  (dropzone -> tags)
+   ========================================================================= */
+
+function buildColourTags(colours) {
+    $('#colour-count').text(colours.length);
+    if (colours.length == 0) {
+        $('#colour-tag-space-empty').removeClass('d-none');
+        $('#colour-tag-space').addClass('d-none');
+    }
+    else {
+        $('#colour-tag-space-empty').addClass('d-none');
+        // Clear out the space first so it doesn't duplicate if called multiple times
+        $('#colour-tag-space').empty().removeClass('d-none');
+
+        $.each(colours, function (index, value) {
+            // Normalize the text label (e.g., handles gradient or "Brand" strings nicely)
+            let labelText = value;
+
+            // Inline styles to handle standard hex codes vs a gradient property string
+            let visualStyle = value.toLowerCase().includes('gradient')
+                ? `background: ${value};`
+                : `background-color: ${value};`;
+
+            $('#colour-tag-space').append(`
+            <div class="colour-frame-pill">
+                <span class="colour-badge-circle" style="${visualStyle}"></span>
+                <span class="colour-label-text">${labelText}</span>
+            </div>
+        `);
+        });
+    }
+}
+
+function buildImgTags(extractedImages) {
+    const extracted = Array.isArray(extractedImages) ? extractedImages : [];
+
+    const $container = $('#img-tag-container');
+    $container.empty();
+
+    const uploadedKeys = {};
+
+    // 1. Uploaded images — removable only via their times-circle icon
+    images.forEach(function (img, index) {
+        uploadedKeys[imageDedupeKey(img.src)] = true;
+
+        const $card = $('<div class="image-preview-card uploaded-image-card"></div>')
+            .attr('data-upload-index', index);
+        $card.append($('<img class="preview-img-element" />').attr({ src: img.src, alt: img.alt }));
+        $card.append($('<div class="image-name-label"></div>').text(img.alt));
+        $card.append(
+            '<button type="button" class="remove-image-tag" title="Remove image">' +
+            '<i class="uil uil-times-circle"></i>' +
+            '</button>'
+        );
+
+        $container.append($card);
+    });
+
+    // 2. Images found in the HTML source (skip any already shown as uploads)
+    extracted.forEach(function (image) {
+        // Support both the new {src, alt} objects and legacy plain strings
+        const base64Str = typeof image === 'string' ? image : image.src;
+        const altText = (typeof image === 'object' && image.alt) ? image.alt : 'Image';
+
+        const imgSrc = base64Str.startsWith('data:') ? base64Str : `data:image/png;base64,${base64Str}`;
+        if (uploadedKeys[imageDedupeKey(imgSrc)]) return;
+
+        const $card = $('<div class="image-preview-card"></div>');
+        $card.append($('<img class="preview-img-element" />').attr({ src: imgSrc, alt: altText }));
+        $card.append($('<div class="image-name-label"></div>').text(altText));
+
+        $container.append($card);
+    });
+
+    // 3. Static "+" actionable placeholder card at the end
+    $container.append(`
+        <div class="image-preview-card upload-trigger-card" id="trigger-image-modal">
+            <div class="plus-icon-wrapper">
+                <i class="uil uil-plus"></i>
+            </div>
+        </div>
+    `);
+
+    $('#trigger-image-modal').on('click', function () {
+        $('#image-modal').modal('show');
+    });
+}
+
+function buildVarTags(vars) {
+    $('#var-count').text(vars.length);
+    if (vars.length < 1) {
+        $('#token-grid-empty').removeClass('d-none');
+        $('#token-grid').addClass('d-none');
+    }
+    else {
+        $('#token-grid-empty').addClass('d-none');
+        // Clear out the grid first to avoid duplicating elements on re-runs
+        $('#token-grid').empty().removeClass('d-none');
+        vars.forEach(function (token) {
+            $('#token-grid').append(`<span class="var-tag" data-clipboard-content="${token}">${token.replaceAll('{', '').replaceAll('}', '')}</span>`);
+        });
+    }
+}
+
+/* ---- Image upload: dropzone -> base64 tags ---- */
+
+// Compare images by their base64 payload so differing MIME prefixes
+// (or a missing data: prefix in the source HTML) don't defeat the dedupe
+function imageDedupeKey(src) {
+    return src.replace(/^data:[^,]*,/, '');
+}
+
+// Rebuild the image tag panel from the CURRENT source. The preview iframe
+// syncs edits into the textarea without firing keyup, so re-extracting here
+// (rather than caching the last keyup extraction) can't go stale.
+function refreshImgTags() {
+    buildImgTags(extractImagesFromHTML($('#html-input').val()));
+}
+
+function initImageUpload() {
+    $('#add-images-btn').off('click.imgupload').on('click.imgupload', addDropzoneImagesToTags);
+
+    // Uploaded tags can only be removed via their times-circle icon —
+    // the card itself deliberately has no other removal path
+    $(document).off('click.imgupload', '.remove-image-tag')
+        .on('click.imgupload', '.remove-image-tag', function (e) {
+            e.stopPropagation();
+
+            const index = parseInt($(this).closest('.image-preview-card').attr('data-upload-index'), 10);
+            if (!isNaN(index)) {
+                images.splice(index, 1);
+                refreshImgTags();
+            }
+        });
+}
+
+function getDropzoneInstance() {
+    const el = document.getElementById('myAwesomeDropzone');
+    if (!el) return null;
+    if (el.dropzone) return el.dropzone; // set by Dropzone on init
+
+    if (typeof Dropzone !== 'undefined') {
+        try { return Dropzone.forElement(el); }
+        catch (e) { /* not initialised — fall through */ }
+
+        // Theme auto-init hasn't run; initialise it ourselves so the
+        // Add Images button is never dead
+        try {
+            return new Dropzone(el, {
+                url: el.getAttribute('action') || '/',
+                autoProcessQueue: false
+            });
+        }
+        catch (e) { /* Dropzone refused the element */ }
+    }
+    return null;
+}
+
+function addDropzoneImagesToTags() {
+    const dz = getDropzoneInstance();
+    if (!dz) return;
+
+    // Only images Dropzone itself accepted (skips maxFilesize/maxFiles rejects)
+    const files = dz.files.filter(function (file) {
+        return file.accepted !== false && file.type && file.type.startsWith('image/');
+    });
+
+    function finalise() {
+        dz.removeAllFiles(true);
+        refreshImgTags();
+        $('#image-modal').modal('hide');
+    }
+
+    if (!files.length) {
+        finalise();
+        return;
+    }
+
+    // Read every file as a base64 data URI; finalise once all reads settle
+    let remaining = files.length;
+    files.forEach(function (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            const dataUri = e.target.result;
+
+            const alreadyAdded = images.some(function (img) { return img.src === dataUri; });
+            if (!alreadyAdded) {
+                images.push({
+                    src: dataUri,
+                    alt: file.name.replace(/\.[^.]+$/, '') // file name without extension
+                });
+            }
+
+            if (--remaining === 0) finalise();
+        };
+
+        reader.onerror = function () {
+            if (--remaining === 0) finalise();
+        };
+
+        try {
+            reader.readAsDataURL(file);
+        } catch (err) {
+            // Unreadable File object — count it as settled so the modal
+            // still closes and the queue still clears
+            if (--remaining === 0) finalise();
+        }
+    });
+}
+
+
+/* =========================================================================
+   11. MBB COLOUR TABLE  (DataTables)
+   ========================================================================= */
+
+function buildMbbColourTable(mbbColours) {
+    colourTable = $('#mbb-colour-table')
+        .on('preXhr.dt', function () {
+            addTablePlaceHolder('mbb-colour-table', 20, 15);
+        })
+        .DataTable({
+            dom: "t",
+            "drawCallback": function () {
+                applyPaginationAndCount(this);
+            },
+            data: mbbColours,
+            "paging": true,
+            "scrollY": '60vh',
+            "pagingType": "simple",
+            "language": {
+                "info": "_START_ to _END_ of _TOTAL_ entries",
+                lengthMenu: "_MENU_"
+            },
+            columns: [
+                {
+                    title: "Preview",
+                    data: 'color',
+                    width: "120px",
+                    className: '',
+                    render: function (data, type, row) {
+                        return `<div style="display: flex; align-items: center;">
+                <div class="colour-frame" style="background-color: ${data};"></div>
+                <span style="padding-left: 10px;">${data}</span>
+            </div>`;
+                    }
+                },
+                {
+                    title: "Name",
+                    data: "name",
+                    orderable: false,
+                    className: 'text-center',
+                    render: function (data, type, row) {
+                        return `<div class="elipses-cell" style=max-width:"40px">${data}</div>`;
+                    }
+                },
+
+            ],
+            responsive: true,
+            "pageLength": -1,
+            destroy: true,
+            initComplete: function () {
+            },
+        });
+}
+
+// Keep column widths correct when the table becomes visible inside a tab
+$('.nav-item').on('click', function () {
+    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+});
+
+// Bootstrap fires this after the pane is actually visible — the click above
+// can land while the pane is still hidden, leaving stale widths
+$(document).on('shown.bs.tab', 'button[data-bs-toggle="tab"]', function () {
+    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+});
+
+
+/* =========================================================================
+   12. SEND EMAIL
+   ========================================================================= */
+
+$('#send-btn').on('click', function () {
+    $.ajax({
+        url: '/Email/SendEmailFromRenderer',
+        type: "POST", // POST to handle large HTML template payloads safely
+        data: {
+            template: $('#html-input').val(),
+            recipient: $('#email-address').val()
+        },
+        success: function (data) {
+            console.log('Email sent successfully:', data);
+            toastr.success('Email sent to ' + $('#email-address').val());
+        },
+        error: function (xhr, status, error) {
+            console.error('Error sending email:', error);
+            toastr.error('Could not send the email');
+        }
+    });
+});
+
+
+/* =========================================================================
+   13. CLIPBOARD COPY + MISC UI EVENTS
+   ========================================================================= */
+
+// Modal openers
+$('#add-colour-btn').on('click', function () {
+    $('#add-colour-modal').modal('show');
+});
+
+$('#add-img-btn').on('click', function () {
+    $('#image-modal').modal('show');
+});
+
+// Copy a detected colour pill's hex code
+$(document).on('click', '.colour-frame-pill', function () {
+    let hexCode = $(this).text().trim();
+    mbbCopyToClipboard(hexCode);
+});
+
+// Copy a template variable token (with braces)
+$(document).on('click', '.var-tag', function () {
+    let variable = $(this).attr('data-clipboard-content');
+    mbbCopyToClipboard(variable, `Copied var:${variable} to clipboard`);
+});
+
+// Copy the colour wheel's current hex value
+$('#colour-info-section').on('click', function () {
+    let hexCode = $('#hex-value').val();
+    mbbCopyToClipboard(hexCode);
+});
+
+// Copy a hex code from the MBB colour table
+$(document).on('click', '#mbb-colour-table > tbody > tr', function () {
+    let table = $('#mbb-colour-table').DataTable();
+    let rowData = table.row(this).data();
+    if (!rowData) return;
+    let hexCode = rowData.color;
+    mbbCopyToClipboard(hexCode);
+});
+  </script>
+</body>
+</html>
